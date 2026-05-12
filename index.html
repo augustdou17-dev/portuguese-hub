@@ -875,7 +875,7 @@ async function doTranslate() {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
             body: JSON.stringify({
                 model: 'gpt-4o-mini',
-                messages: [{ role: 'user', content: `Translate the following from ${src} to ${tgt}. Return only the translation, nothing else.\n\n"${text}"` }],
+                messages: [{ role: 'user', content: `Translate the following from ${src} to ${tgt}. Use natural, colloquial, everyday language exactly as native Brazilians speak in real life — informal, conversational, not textbook or formal. Return only the translation, nothing else.\n\n"${text}"` }],
                 temperature: 0.2,
                 max_tokens: 500
             })
