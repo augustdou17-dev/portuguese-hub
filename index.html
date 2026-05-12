@@ -440,6 +440,10 @@
         .tag-chip:hover { border-color: var(--green); color: var(--text); }
         .tag-chip.selected { background: var(--green); color: white; border-color: var(--green); }
         .tag-chip.custom { border-style: dashed; }
+        .tag-chip-wrap { display: inline-flex; align-items: center; }
+        .tag-chip-wrap .tag-chip { border-radius: 20px 0 0 20px; border-right: none; }
+        .tag-chip-delete { background: var(--surface2); border: 1px solid var(--border); border-left: none; border-radius: 0 20px 20px 0; color: var(--muted); cursor: pointer; font-size: 0.7rem; padding: 4px 8px; transition: all 0.2s; line-height: 1; }
+        .tag-chip-delete:hover { background: #7a1a1a; color: #ff8080; border-color: #ff6b6b44; }
         .custom-tag-row { display: flex; gap: 8px; margin-top: 10px; }
         .custom-tag-row input { flex: 1; }
         .example-section { margin-bottom: 4px; }
@@ -1295,9 +1299,13 @@ function renderTagPicker() {
         </div>`).join('');
     const custom = customTags.length ? `
         <div class="tag-group">
-            <div class="tag-group-name">Custom</div>
+            <div class="tag-group-name">Custom <span style="color:var(--muted);font-weight:400">(click ✕ to delete)</span></div>
             <div class="tag-chips">
-                ${customTags.map(t => `<button class="tag-chip custom ${selectedTags.includes(t) ? 'selected' : ''}" onclick="toggleTag('${t}')">${t}</button>`).join('')}
+                ${customTags.map(t => `
+                <span class="tag-chip-wrap">
+                    <button class="tag-chip custom ${selectedTags.includes(t) ? 'selected' : ''}" onclick="toggleTag('${t.replace(/'/g,"\\'")}')"> ${t}</button>
+                    <button class="tag-chip-delete" onclick="deleteCustomTag('${t.replace(/'/g,"\\'")}')">✕</button>
+                </span>`).join('')}
             </div>
         </div>` : '';
     picker.innerHTML = groups + custom;
@@ -1308,6 +1316,22 @@ function toggleTag(tag) {
         ? selectedTags.filter(t => t !== tag)
         : [...selectedTags, tag];
     renderTagPicker();
+}
+
+function deleteCustomTag(tag) {
+    if (!confirm(`Delete the tag "${tag}"? It will be removed from all words.`)) return;
+    customTags = customTags.filter(t => t !== tag);
+    localStorage.setItem('pt-custom-tags', JSON.stringify(customTags));
+    selectedTags     = selectedTags.filter(t => t !== tag);
+    editSelectedTags = editSelectedTags.filter(t => t !== tag);
+    // remove from all saved words
+    const words = getNotes().map(w => ({ ...w, tags: (w.tags || []).filter(t => t !== tag) }));
+    saveNotes(words);
+    renderTagPicker();
+    renderEditTagPicker();
+    renderNotepad();
+    refreshFilterSelect();
+    showToast(`Tag "${tag}" deleted.`);
 }
 
 function addCustomTag() {
@@ -1562,9 +1586,13 @@ function renderEditTagPicker() {
         </div>`).join('');
     const custom = customTags.length ? `
         <div class="tag-group">
-            <div class="tag-group-name">Custom</div>
+            <div class="tag-group-name">Custom <span style="color:var(--muted);font-weight:400">(click ✕ to delete)</span></div>
             <div class="tag-chips">
-                ${customTags.map(t => `<button class="tag-chip custom ${editSelectedTags.includes(t) ? 'selected' : ''}" onclick="toggleEditTag('${t}')">${t}</button>`).join('')}
+                ${customTags.map(t => `
+                <span class="tag-chip-wrap">
+                    <button class="tag-chip custom ${editSelectedTags.includes(t) ? 'selected' : ''}" onclick="toggleEditTag('${t.replace(/'/g,"\\'")}')"> ${t}</button>
+                    <button class="tag-chip-delete" onclick="deleteCustomTag('${t.replace(/'/g,"\\'")}')">✕</button>
+                </span>`).join('')}
             </div>
         </div>` : '';
     picker.innerHTML = groups + custom;
