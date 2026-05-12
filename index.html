@@ -477,7 +477,7 @@
             </div>
         </div>
         <div class="translator-actions">
-            <button class="btn btn-primary" onclick="translate()">Translate</button>
+            <button class="btn btn-primary" onclick="doTranslate()">Translate</button>
             <button class="btn btn-secondary" onclick="clearTranslator()">Clear</button>
         </div>
     </div>
@@ -858,7 +858,7 @@ function swapLanguage() {
     lastTranslation = '';
 }
 
-async function translate() {
+async function doTranslate() {
     if (!requireKeys(['openai'])) return;
     const text = document.getElementById('translate-input').value.trim();
     if (!text) return;
@@ -910,7 +910,7 @@ function saveTranslationToNotepad() {
 }
 
 document.getElementById('translate-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && e.ctrlKey) translate();
+    if (e.key === 'Enter' && e.ctrlKey) doTranslate();
 });
 
 // ─────────────────────────────────────────
