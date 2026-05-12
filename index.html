@@ -428,6 +428,14 @@
         }
         .toast.show { transform: translateY(0); opacity: 1; }
 
+        /* MIC BUTTON */
+        .btn-mic { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+        .btn-mic:hover { background: var(--border); }
+        .btn-mic.recording { background: #7a1a1a; color: #ff8080; border-color: #ff6b6b; animation: pulse 1.2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .mic-status { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 0.85rem; color: var(--muted); }
+        .mic-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; animation: pulse 1s infinite; flex-shrink: 0; }
+
         /* SETTINGS TAB */
         .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; max-width: 600px; }
         .settings-group { margin-bottom: 28px; }
@@ -575,6 +583,11 @@
         <div class="translator-actions">
             <button class="btn btn-primary" onclick="doTranslate()">Translate</button>
             <button class="btn btn-secondary" onclick="clearTranslator()">Clear</button>
+            <button class="btn btn-mic" id="mic-btn" onclick="toggleMic()">🎤 Start Speaking</button>
+        </div>
+        <div class="mic-status" id="mic-status" style="display:none">
+            <span class="mic-dot"></span>
+            <span id="mic-status-text">Listening...</span>
         </div>
     </div>
 
@@ -1041,6 +1054,78 @@ function saveTranslationToNotepad() {
 document.getElementById('translate-input').addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.ctrlKey) doTranslate();
 });
+
+// ─────────────────────────────────────────
+// SPEECH RECOGNITION (MIC)
+// ─────────────────────────────────────────
+let recognition = null;
+let isRecording = false;
+
+function buildRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    const r = new SR();
+    r.continuous      = true;
+    r.interimResults  = true;
+    r.lang            = translateDir === 'en-pt' ? 'en-US' : 'pt-BR';
+
+    let finalTranscript = '';
+
+    r.onresult = e => {
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            const t = e.results[i][0].transcript;
+            if (e.results[i].isFinal) finalTranscript += t + ' ';
+            else interim = t;
+        }
+        document.getElementById('translate-input').value = finalTranscript + interim;
+        document.getElementById('mic-status-text').textContent =
+            interim ? `Hearing: "${interim}"` : 'Listening...';
+    };
+
+    r.onerror = e => {
+        showToast('Mic error: ' + e.error);
+        stopMic();
+    };
+
+    r.onend = () => {
+        if (isRecording) r.start(); // keep alive until user stops
+    };
+
+    r._finalTranscript = () => finalTranscript;
+    return r;
+}
+
+function toggleMic() {
+    isRecording ? stopMic() : startMic();
+}
+
+function startMic() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { showToast('Speech recognition not supported in this browser. Use Chrome or Safari.'); return; }
+
+    recognition = buildRecognition();
+    recognition.start();
+    isRecording = true;
+
+    document.getElementById('translate-input').value = '';
+    document.getElementById('mic-btn').textContent   = '⏹ Stop';
+    document.getElementById('mic-btn').classList.add('recording');
+    document.getElementById('mic-status').style.display = 'flex';
+    document.getElementById('mic-status-text').textContent = 'Listening...';
+}
+
+function stopMic() {
+    if (recognition) { recognition.onend = null; recognition.stop(); recognition = null; }
+    isRecording = false;
+
+    document.getElementById('mic-btn').textContent = '🎤 Start Speaking';
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('mic-status').style.display = 'none';
+
+    const text = document.getElementById('translate-input').value.trim();
+    if (text) doTranslate();
+}
 
 // ─────────────────────────────────────────
 // SPEECH
