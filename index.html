@@ -371,6 +371,20 @@
         .status-ok  { color: #4adf4a; }
         .status-missing { color: #df6060; }
 
+        /* VOCAB DASHBOARD */
+        .vocab-dashboard { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+        .dashboard-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 6px; }
+        .dashboard-total { font-size: 2rem; font-weight: 700; color: #4adf4a; margin-bottom: 20px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .dashboard-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+        .dashboard-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .dashboard-card-topic { font-size: 0.88rem; font-weight: 600; }
+        .dashboard-card-level { font-size: 0.72rem; color: var(--muted); background: var(--border); padding: 2px 8px; border-radius: 10px; }
+        .dashboard-bar-wrap { background: var(--border); border-radius: 4px; height: 6px; margin-bottom: 8px; }
+        .dashboard-bar-fill { height: 100%; border-radius: 4px; background: #4adf4a; transition: width 0.4s; }
+        .dashboard-card-stats { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); }
+        .dashboard-card-stats strong { color: var(--text); }
+
         /* GRAMMAR TAB */
         .grammar-sections { display: flex; flex-direction: column; gap: 32px; }
         .grammar-group-title { font-size: 1rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
@@ -518,7 +532,12 @@
             </select>
             <button class="btn btn-primary" onclick="generateVocab()">New Set</button>
         </div>
-        <div id="vocab-stats" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:0.85rem;color:var(--muted);margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;"></div>
+        <!-- PROGRESS DASHBOARD -->
+        <div class="vocab-dashboard">
+            <div class="dashboard-title">Your Progress</div>
+            <div class="dashboard-total" id="dashboard-total">0 words learned</div>
+            <div class="dashboard-grid" id="dashboard-grid"></div>
+        </div>
         <div id="vocab-container" class="flashcard-wrapper">
             <div class="loading"><div class="spinner"></div>Generating vocabulary...</div>
         </div>
@@ -1024,6 +1043,53 @@ function getTotalLearned() {
     return total;
 }
 
+const topicLabels = {
+    everyday: 'Everyday Life', food: 'Food & Restaurants', travel: 'Travel & Directions',
+    emotions: 'Feelings & Emotions', work: 'Work & Business', verbs: 'Verbs', slang: 'Brazilian Slang'
+};
+const levelLabels = { beginner: 'A1–A2', intermediate: 'B1–B2', advanced: 'C1–C2' };
+const TARGET_PER_CATEGORY = 200; // approx words to fill a category
+
+function renderVocabDashboard() {
+    const total = getTotalLearned();
+    document.getElementById('dashboard-total').textContent = `${total} word${total !== 1 ? 's' : ''} learned`;
+
+    const grid = document.getElementById('dashboard-grid');
+    const cards = [];
+
+    Object.keys(topicMap).forEach(topic => {
+        Object.keys(levelMap).forEach(level => {
+            const learned = getLearnedWords(level, topic).length;
+            const seen    = getSeenWords(level, topic).length;
+            if (learned > 0 || seen > 0) {
+                cards.push({ topic, level, learned, seen });
+            }
+        });
+    });
+
+    if (!cards.length) {
+        grid.innerHTML = `<div style="color:var(--muted);font-size:0.88rem;grid-column:1/-1;">Start learning to see your progress here. Mark words as "I know this" to track them.</div>`;
+        return;
+    }
+
+    cards.sort((a, b) => b.learned - a.learned);
+    grid.innerHTML = cards.map(c => {
+        const pct = Math.min(100, Math.round((c.learned / TARGET_PER_CATEGORY) * 100));
+        return `
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <div class="dashboard-card-topic">${topicLabels[c.topic]}</div>
+                <div class="dashboard-card-level">${levelLabels[c.level]}</div>
+            </div>
+            <div class="dashboard-bar-wrap"><div class="dashboard-bar-fill" style="width:${pct}%"></div></div>
+            <div class="dashboard-card-stats">
+                <span><strong>${c.learned}</strong> learned</span>
+                <span>${c.seen} seen</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
 function renderVocabStats() {
     const level   = document.getElementById('vocab-level').value;
     const topic   = document.getElementById('vocab-topic').value;
@@ -1046,7 +1112,7 @@ function resetVocabProgress() {
     if (!confirm('Reset all progress for this category? This cannot be undone.')) return;
     localStorage.removeItem(vocabSeenKey(level, topic));
     localStorage.removeItem(vocabLearnedKey(level, topic));
-    renderVocabStats();
+    renderVocabDashboard();
     generateVocab();
 }
 
@@ -1163,6 +1229,7 @@ function nextCard(knew) {
     if (knew) {
         knownCount++;
         saveLearnedWord(level, topic, vocabCards[currentCard]);
+        renderVocabDashboard();
     }
     currentCard++;
     renderFlashcard();
@@ -1303,6 +1370,7 @@ renderGrammarGrid('grammar-main',      grammarMain);
 renderGrammarGrid('grammar-readings',  grammarReadings);
 if (YT_KEY)     loadChannelVideos();
 else document.getElementById('video-grid').innerHTML = '<div class="empty-state"><div class="icon">🔑</div><div class="title">YouTube key not set</div>Go to ⚙️ Settings to add your API keys.</div>';
+renderVocabDashboard();
 if (OPENAI_KEY) generateVocab();
 else document.getElementById('vocab-container').innerHTML = '<div class="empty-state"><div class="icon">🔑</div><div class="title">OpenAI key not set</div>Go to ⚙️ Settings to add your API keys.</div>';
 </script>
