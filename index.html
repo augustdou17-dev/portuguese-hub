@@ -428,6 +428,54 @@
         }
         .toast.show { transform: translateY(0); opacity: 1; }
 
+        /* NOTEPAD IMPROVEMENTS */
+        .form-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        @media (max-width: 600px) { .form-two-col { grid-template-columns: 1fr; } }
+        .tag-section { margin-bottom: 14px; }
+        .tag-section-label { font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+        .tag-group { margin-bottom: 10px; }
+        .tag-group-name { font-size: 0.75rem; color: var(--muted); margin-bottom: 5px; }
+        .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag-chip { padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer; font-size: 0.8rem; font-family: inherit; transition: all 0.2s; }
+        .tag-chip:hover { border-color: var(--green); color: var(--text); }
+        .tag-chip.selected { background: var(--green); color: white; border-color: var(--green); }
+        .tag-chip.custom { border-style: dashed; }
+        .custom-tag-row { display: flex; gap: 8px; margin-top: 10px; }
+        .custom-tag-row input { flex: 1; }
+        .example-section { margin-bottom: 4px; }
+        .example-preview { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 0.88rem; line-height: 1.6; color: var(--muted); min-height: 48px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .notepad-toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .word-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .word-translation { font-size: 0.9rem; color: var(--muted); margin-top: 3px; }
+        .word-example { font-size: 0.83rem; color: var(--muted); font-style: italic; margin-top: 8px; line-height: 1.5; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .word-card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+        .word-tag-chip { font-size: 0.72rem; padding: 2px 9px; border-radius: 10px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+        .word-meta { font-size: 0.74rem; color: var(--border); margin-top: 6px; }
+        .due-badge { font-size: 0.72rem; background: #7a4a0022; color: #ffaa44; border: 1px solid #ffaa4455; border-radius: 10px; padding: 2px 8px; white-space: nowrap; flex-shrink: 0; }
+        .review-due-card { border-color: #ffaa4455; }
+        .speak-inline { width: 26px; height: 26px; font-size: 0.78rem; flex-shrink: 0; }
+
+        /* REVIEW OVERLAY */
+        .review-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1001; align-items: center; justify-content: center; padding: 20px; }
+        .review-overlay.open { display: flex; }
+        .review-box { background: var(--surface); border-radius: 16px; width: 100%; max-width: 520px; overflow: hidden; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+        .review-progress { text-align: center; color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+        .review-card { min-height: 220px; background: var(--surface2); border: 2px solid var(--border); border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 28px; margin-bottom: 20px; transition: border-color 0.2s; }
+        .review-card:hover { border-color: var(--green); }
+        .review-card-inner { width: 100%; text-align: center; }
+        .review-card-inner.flipped .review-front { display: none; }
+        .review-card-inner:not(.flipped) .review-back { display: none; }
+        .review-word { font-size: 1.8rem; font-weight: 700; margin-bottom: 10px; }
+        .review-translation { font-size: 1.3rem; font-weight: 600; color: #4adf4a; margin-bottom: 10px; }
+        .review-rating { display: flex; gap: 10px; justify-content: center; }
+        .review-forgot { background: #7a1a1a22; color: #df6060; border: 1px solid #df606055; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.88rem; }
+        .review-hard   { background: #7a5a0022; color: #ffaa44; border: 1px solid #ffaa4455; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.88rem; }
+        .review-easy   { background: #1a7a1a22; color: #4adf4a; border: 1px solid #4adf4a55; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.88rem; }
+        .review-forgot:hover { background: #7a1a1a44; }
+        .review-hard:hover   { background: #7a5a0044; }
+        .review-easy:hover   { background: #1a7a1a44; }
+
         /* MIC BUTTON */
         .btn-mic { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
         .btn-mic:hover { background: var(--border); }
@@ -594,16 +642,91 @@
     <!-- ===== NOTEPAD ===== -->
     <div class="tab-panel" id="tab-notepad">
         <div class="section-title">📝 Vocabulary Notepad</div>
-        <p class="section-subtitle">Save words and expressions — click 🔊 to hear the pronunciation</p>
+        <p class="section-subtitle">Save, tag, and review words — your personal Portuguese dictionary</p>
+
+        <!-- ADD FORM -->
         <div class="add-word-form">
             <h3>Add a word or expression</h3>
-            <div class="form-row">
+            <div class="form-two-col">
                 <input type="text" id="word-input" placeholder="Word or phrase in Portuguese" />
-                <button class="btn btn-primary" onclick="addWord()">Add</button>
+                <input type="text" id="translation-input" placeholder="English translation" />
             </div>
-            <input type="text" id="note-input" placeholder="Notes, translation, or context (optional)" />
+
+            <div class="tag-section">
+                <div class="tag-section-label">Tags <span style="color:var(--muted);font-weight:400;font-size:0.8rem">(pick one or more)</span></div>
+                <div id="tag-picker"></div>
+                <div class="custom-tag-row">
+                    <input type="text" id="custom-tag-input" placeholder="Create a custom tag..." style="flex:1" />
+                    <button class="btn btn-secondary" onclick="addCustomTag()" style="white-space:nowrap">+ Add tag</button>
+                </div>
+            </div>
+
+            <div class="example-section">
+                <div class="tag-section-label">Example sentence</div>
+                <div id="example-preview" class="example-preview">No example yet.</div>
+                <button class="btn btn-secondary" onclick="generateExample()" style="margin-top:10px;font-size:0.82rem">✨ Generate example with AI</button>
+            </div>
+
+            <button class="btn btn-primary" onclick="addWord()" style="margin-top:16px">Add to Notepad</button>
         </div>
+
+        <!-- TOOLBAR -->
+        <div class="notepad-toolbar">
+            <input type="text" id="notepad-search" placeholder="🔍 Search words..." oninput="updateNotepadSearch(this.value)" style="flex:1;min-width:140px" />
+            <select id="notepad-filter" onchange="updateNotepadFilter(this.value)" style="width:auto;min-width:130px">
+                <option value="all">All tags</option>
+            </select>
+            <button class="btn btn-secondary" id="review-btn" onclick="startReview()" style="white-space:nowrap">📚 Review</button>
+        </div>
+
         <div id="word-list" class="word-list"></div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="review-overlay" id="edit-modal">
+        <div class="review-box" style="max-width:580px;max-height:90vh;overflow-y:auto">
+            <div class="review-header">
+                <span style="font-weight:600">✏️ Edit Word</span>
+                <button class="modal-close" onclick="closeEditModal()">✕</button>
+            </div>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+                <div class="form-two-col">
+                    <div>
+                        <div class="tag-section-label">Portuguese word</div>
+                        <input type="text" id="edit-word" placeholder="Word or phrase" />
+                    </div>
+                    <div>
+                        <div class="tag-section-label">English translation</div>
+                        <input type="text" id="edit-translation" placeholder="Translation" />
+                    </div>
+                </div>
+                <div>
+                    <div class="tag-section-label">Tags</div>
+                    <div id="edit-tag-picker"></div>
+                    <div class="custom-tag-row" style="margin-top:8px">
+                        <input type="text" id="edit-custom-tag-input" placeholder="Create a custom tag..." style="flex:1" />
+                        <button class="btn btn-secondary" onclick="addEditCustomTag()">+ Add tag</button>
+                    </div>
+                </div>
+                <div>
+                    <div class="tag-section-label">Example sentence</div>
+                    <div id="edit-example-preview" class="example-preview">No example yet.</div>
+                    <button class="btn btn-secondary" onclick="generateEditExample()" style="margin-top:8px;font-size:0.82rem">✨ Generate with AI</button>
+                </div>
+                <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW OVERLAY -->
+    <div class="review-overlay" id="review-overlay">
+        <div class="review-box">
+            <div class="review-header">
+                <span style="font-weight:600">📚 Review Session</span>
+                <button class="modal-close" onclick="closeReview()">✕</button>
+            </div>
+            <div id="review-content" style="padding:24px"></div>
+        </div>
     </div>
 
     <!-- ===== VOCAB BUILDER ===== -->
@@ -1142,50 +1265,389 @@ function speak(text, lang = 'pt-BR') {
 // ─────────────────────────────────────────
 // NOTEPAD MODULE
 // ─────────────────────────────────────────
-function addWordToStore(word, note = '') {
-    const words = JSON.parse(localStorage.getItem('pt-notepad') || '[]');
-    words.unshift({ word, note, id: Date.now() });
-    localStorage.setItem('pt-notepad', JSON.stringify(words));
+const PRESET_TAGS = {
+    'Noun':       ['People', 'Food & Drink', 'Places', 'Objects', 'Nature', 'Body'],
+    'Verb':       ['Daily Routine', 'Travel', 'Work', 'Social', 'Feelings'],
+    'Adjective':  ['Descriptions', 'Emotions', 'Size & Quantity'],
+    'Expression': ['Slang', 'Greetings', 'Connectors', 'Filler Words'],
+    'Other':      ['Grammar', 'Numbers', 'Time', 'Culture']
+};
+
+let selectedTags    = [];
+let customTags      = JSON.parse(localStorage.getItem('pt-custom-tags') || '[]');
+let generatedExample = '';
+let notepadFilter   = 'all';
+let notepadSearch   = '';
+
+function getNotes() { return JSON.parse(localStorage.getItem('pt-notepad') || '[]'); }
+function saveNotes(w) { localStorage.setItem('pt-notepad', JSON.stringify(w)); }
+
+// ── TAG PICKER ──
+function renderTagPicker() {
+    const picker = document.getElementById('tag-picker');
+    if (!picker) return;
+    const groups = Object.entries(PRESET_TAGS).map(([group, tags]) => `
+        <div class="tag-group">
+            <div class="tag-group-name">${group}</div>
+            <div class="tag-chips">
+                ${tags.map(t => `<button class="tag-chip ${selectedTags.includes(t) ? 'selected' : ''}" onclick="toggleTag('${t}')">${t}</button>`).join('')}
+            </div>
+        </div>`).join('');
+    const custom = customTags.length ? `
+        <div class="tag-group">
+            <div class="tag-group-name">Custom</div>
+            <div class="tag-chips">
+                ${customTags.map(t => `<button class="tag-chip custom ${selectedTags.includes(t) ? 'selected' : ''}" onclick="toggleTag('${t}')">${t}</button>`).join('')}
+            </div>
+        </div>` : '';
+    picker.innerHTML = groups + custom;
+}
+
+function toggleTag(tag) {
+    selectedTags = selectedTags.includes(tag)
+        ? selectedTags.filter(t => t !== tag)
+        : [...selectedTags, tag];
+    renderTagPicker();
+}
+
+function addCustomTag() {
+    const input = document.getElementById('custom-tag-input');
+    const tag = input.value.trim();
+    if (!tag || customTags.includes(tag)) return;
+    customTags.push(tag);
+    localStorage.setItem('pt-custom-tags', JSON.stringify(customTags));
+    selectedTags.push(tag);
+    input.value = '';
+    renderTagPicker();
+}
+
+// ── GENERATE EXAMPLE ──
+async function generateExample() {
+    if (!requireKeys(['openai'])) return;
+    const word = document.getElementById('word-input').value.trim();
+    if (!word) { showToast('Enter a word first'); return; }
+    const preview = document.getElementById('example-preview');
+    preview.innerHTML = '<span>Generating...</span>';
+    try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: `Write one short, natural example sentence in colloquial Brazilian Portuguese using the word or expression "${word}". Return ONLY the Portuguese sentence followed by its English translation in parentheses. Example format: Ele foi ao mercado hoje. (He went to the market today.)` }],
+                temperature: 0.7, max_tokens: 120
+            })
+        });
+        const data = await res.json();
+        generatedExample = data.choices[0].message.content.trim();
+        const ptPart = generatedExample.split('(')[0].trim().replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        preview.innerHTML = `<span style="font-style:italic;color:var(--text);flex:1">${generatedExample}</span>
+            <button class="speak-btn speak-inline" onclick="speak('${ptPart}','pt-BR')" title="Hear example">🔊</button>`;
+    } catch(e) {
+        preview.innerHTML = '<span style="color:#ff6b6b">Failed — check your OpenAI key.</span>';
+    }
+}
+
+// ── ADD / DELETE ──
+function addWordToStore(word, translation = '', example = '', tags = []) {
+    const words = getNotes();
+    words.unshift({ id: Date.now(), word, translation, example, tags,
+        addedDate: Date.now(), lastReviewed: null, nextReview: Date.now(), reviewInterval: 1 });
+    saveNotes(words);
 }
 
 function addWord() {
-    const word = document.getElementById('word-input').value.trim();
-    const note = document.getElementById('note-input').value.trim();
-    if (!word) return;
-    addWordToStore(word, note);
-    document.getElementById('word-input').value = '';
-    document.getElementById('note-input').value = '';
+    const word        = document.getElementById('word-input').value.trim();
+    const translation = document.getElementById('translation-input').value.trim();
+    if (!word) { showToast('Enter a word first'); return; }
+    addWordToStore(word, translation, generatedExample, [...selectedTags]);
+    document.getElementById('word-input').value        = '';
+    document.getElementById('translation-input').value = '';
+    document.getElementById('example-preview').innerHTML = 'No example yet.';
+    generatedExample = '';
+    selectedTags = [];
+    renderTagPicker();
     renderNotepad();
-    showToast('Word saved!');
+    updateReviewBtn();
+    showToast(`"${word}" saved!`);
 }
 
 function deleteWord(id) {
-    const words = JSON.parse(localStorage.getItem('pt-notepad') || '[]').filter(w => w.id !== id);
-    localStorage.setItem('pt-notepad', JSON.stringify(words));
+    saveNotes(getNotes().filter(w => w.id !== id));
     renderNotepad();
+    updateReviewBtn();
 }
 
+// ── FILTER / SEARCH ──
+function updateNotepadFilter(val) { notepadFilter = val; renderNotepad(); }
+function updateNotepadSearch(val) { notepadSearch = val.toLowerCase(); renderNotepad(); }
+
+function refreshFilterSelect() {
+    const allTags = new Set();
+    getNotes().forEach(w => (w.tags || []).forEach(t => allTags.add(t)));
+    const sel = document.getElementById('notepad-filter');
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = `<option value="all">All tags</option>` +
+        [...allTags].map(t => `<option value="${t}" ${t === current ? 'selected' : ''}>${t}</option>`).join('');
+}
+
+// ── REVIEW BUTTON ──
+function getDueWords() {
+    return getNotes().filter(w => !w.nextReview || w.nextReview <= Date.now());
+}
+
+function updateReviewBtn() {
+    const n = getDueWords().length;
+    const btn = document.getElementById('review-btn');
+    if (!btn) return;
+    btn.textContent = n > 0 ? `📚 Review (${n} due)` : '📚 Review';
+    btn.style.color       = n > 0 ? '#ffaa44' : '';
+    btn.style.borderColor = n > 0 ? '#ffaa44' : '';
+}
+
+// ── RENDER NOTEPAD ──
 function renderNotepad() {
-    const words = JSON.parse(localStorage.getItem('pt-notepad') || '[]');
+    refreshFilterSelect();
+    let words = getNotes().map(w => ({
+        nextReview: Date.now(), reviewInterval: 1, tags: [], translation: '', example: '', ...w
+    }));
+    if (notepadFilter !== 'all') words = words.filter(w => w.tags.includes(notepadFilter));
+    if (notepadSearch)           words = words.filter(w =>
+        w.word.toLowerCase().includes(notepadSearch) ||
+        w.translation.toLowerCase().includes(notepadSearch));
+
     const list = document.getElementById('word-list');
+    if (!list) return;
     if (!words.length) {
-        list.innerHTML = '<div class="empty-state"><div class="icon">📝</div><div class="title">No words yet</div>Add a word above or save from the Translator.</div>';
+        list.innerHTML = `<div class="empty-state"><div class="icon">📝</div><div class="title">${getNotes().length ? 'No matches' : 'No words yet'}</div>${getNotes().length ? 'Try a different filter or search.' : 'Add a word above or save one from the Translator.'}</div>`;
         return;
     }
-    list.innerHTML = words.map(w => `
-        <div class="word-card">
+
+    const now = Date.now();
+    list.innerHTML = words.map(w => {
+        const isDue      = w.nextReview <= now;
+        const safeWord   = w.word.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        const ptExample  = w.example ? w.example.split('(')[0].trim() : '';
+        const safeEx     = ptExample.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        const dateStr    = new Date(w.addedDate || w.id).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        return `
+        <div class="word-card ${isDue ? 'review-due-card' : ''}">
             <div class="word-card-content">
-                <div class="word-text">${w.word}</div>
-                ${w.note ? `<div class="word-note">${w.note}</div>` : ''}
+                <div class="word-card-top">
+                    <div style="flex:1">
+                        <div class="word-text">
+                            ${w.word}
+                            <button class="speak-btn speak-inline" onclick="speak('${safeWord}','pt-BR')" title="Pronounce">🔊</button>
+                        </div>
+                        ${w.translation ? `<div class="word-translation">${w.translation}</div>` : ''}
+                        ${w.note && !w.translation ? `<div class="word-note">${w.note}</div>` : ''}
+                    </div>
+                    ${isDue ? '<span class="due-badge">Review due</span>' : ''}
+                </div>
+                ${w.example ? `<div class="word-example">${w.example}
+                    ${ptExample ? `<button class="speak-btn speak-inline" onclick="speak('${safeEx}','pt-BR')" title="Hear example">🔊</button>` : ''}
+                </div>` : ''}
+                ${w.tags.length ? `<div class="word-card-tags">${w.tags.map(t=>`<span class="word-tag-chip">${t}</span>`).join('')}</div>` : ''}
+                <div class="word-meta">Added ${dateStr}</div>
             </div>
             <div class="word-card-actions">
-                <button class="speak-btn" onclick="speak('${w.word.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','pt-BR')" title="Hear pronunciation">🔊</button>
+                <button class="btn btn-secondary" style="font-size:0.82rem;padding:6px 12px" onclick="openEditModal(${w.id})">Edit</button>
                 <button class="btn btn-danger" onclick="deleteWord(${w.id})">Delete</button>
             </div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
 
-document.getElementById('word-input').addEventListener('keydown', e => { if (e.key === 'Enter') addWord(); });
+document.getElementById('word-input').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('translation-input').focus(); });
+document.getElementById('custom-tag-input').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomTag(); });
+
+// ── REVIEW MODE ──
+let reviewQueue = [], reviewIdx = 0, reviewFlipped = false;
+
+function startReview() {
+    reviewQueue = getDueWords();
+    if (!reviewQueue.length) { showToast('No words due for review yet!'); return; }
+    reviewIdx = 0; reviewFlipped = false;
+    document.getElementById('review-overlay').classList.add('open');
+    renderReviewCard();
+}
+
+function closeReview() {
+    document.getElementById('review-overlay').classList.remove('open');
+    renderNotepad();
+    updateReviewBtn();
+}
+
+function renderReviewCard() {
+    const content = document.getElementById('review-content');
+    if (reviewIdx >= reviewQueue.length) {
+        content.innerHTML = `<div class="empty-state">
+            <div class="icon">🎉</div>
+            <div class="title">Review complete!</div>
+            <div style="color:var(--muted);margin-bottom:20px">You reviewed ${reviewQueue.length} word${reviewQueue.length !== 1 ? 's' : ''}.</div>
+            <button class="btn btn-primary" onclick="closeReview()">Done</button>
+        </div>`;
+        return;
+    }
+    const w        = reviewQueue[reviewIdx];
+    const safeWord = w.word.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const ptEx     = w.example ? w.example.split('(')[0].trim() : '';
+    const safeEx   = ptEx.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    content.innerHTML = `
+        <div class="review-progress">${reviewIdx + 1} / ${reviewQueue.length}</div>
+        <div class="review-card" onclick="flipReviewCard()">
+            <div class="review-card-inner ${reviewFlipped ? 'flipped' : ''}">
+                <div class="review-front">
+                    <div class="review-word">${w.word}</div>
+                    ${w.tags.length ? `<div class="word-card-tags" style="justify-content:center;margin-top:8px">${w.tags.map(t=>`<span class="word-tag-chip">${t}</span>`).join('')}</div>` : ''}
+                    <button class="speak-btn" style="margin-top:14px" onclick="event.stopPropagation();speak('${safeWord}','pt-BR')">🔊</button>
+                    <div style="color:var(--muted);font-size:0.82rem;margin-top:12px">Tap to reveal</div>
+                </div>
+                <div class="review-back">
+                    <div class="review-translation">${w.translation || w.note || '—'}</div>
+                    ${w.example ? `<div class="word-example" style="margin-top:8px">${w.example}
+                        ${ptEx ? `<button class="speak-btn speak-inline" onclick="event.stopPropagation();speak('${safeEx}','pt-BR')">🔊</button>` : ''}
+                    </div>` : ''}
+                </div>
+            </div>
+        </div>
+        <div class="review-rating" style="${reviewFlipped ? '' : 'opacity:0;pointer-events:none'}">
+            <button class="review-forgot" onclick="rateWord('forgot')">😕 Forgot</button>
+            <button class="review-hard"   onclick="rateWord('hard')">😐 Hard</button>
+            <button class="review-easy"   onclick="rateWord('easy')">😊 Easy</button>
+        </div>`;
+}
+
+// ── EDIT MODAL ──
+let editingId = null;
+let editSelectedTags = [];
+let editGeneratedExample = '';
+
+function openEditModal(id) {
+    const word = getNotes().find(w => w.id === id);
+    if (!word) return;
+    editingId = id;
+    editSelectedTags = [...(word.tags || [])];
+    editGeneratedExample = word.example || '';
+
+    document.getElementById('edit-word').value        = word.word || '';
+    document.getElementById('edit-translation').value = word.translation || word.note || '';
+    const prev = document.getElementById('edit-example-preview');
+    if (word.example) {
+        const ptPart = word.example.split('(')[0].trim().replace(/'/g, "\\'");
+        prev.innerHTML = `<span style="font-style:italic;color:var(--text);flex:1">${word.example}</span>
+            <button class="speak-btn speak-inline" onclick="speak('${ptPart}','pt-BR')">🔊</button>`;
+    } else {
+        prev.innerHTML = 'No example yet.';
+    }
+    renderEditTagPicker();
+    document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+    editingId = null;
+}
+
+function renderEditTagPicker() {
+    const picker = document.getElementById('edit-tag-picker');
+    if (!picker) return;
+    const groups = Object.entries(PRESET_TAGS).map(([group, tags]) => `
+        <div class="tag-group">
+            <div class="tag-group-name">${group}</div>
+            <div class="tag-chips">
+                ${tags.map(t => `<button class="tag-chip ${editSelectedTags.includes(t) ? 'selected' : ''}" onclick="toggleEditTag('${t}')">${t}</button>`).join('')}
+            </div>
+        </div>`).join('');
+    const custom = customTags.length ? `
+        <div class="tag-group">
+            <div class="tag-group-name">Custom</div>
+            <div class="tag-chips">
+                ${customTags.map(t => `<button class="tag-chip custom ${editSelectedTags.includes(t) ? 'selected' : ''}" onclick="toggleEditTag('${t}')">${t}</button>`).join('')}
+            </div>
+        </div>` : '';
+    picker.innerHTML = groups + custom;
+}
+
+function toggleEditTag(tag) {
+    editSelectedTags = editSelectedTags.includes(tag)
+        ? editSelectedTags.filter(t => t !== tag)
+        : [...editSelectedTags, tag];
+    renderEditTagPicker();
+}
+
+function addEditCustomTag() {
+    const input = document.getElementById('edit-custom-tag-input');
+    const tag = input.value.trim();
+    if (!tag || customTags.includes(tag)) return;
+    customTags.push(tag);
+    localStorage.setItem('pt-custom-tags', JSON.stringify(customTags));
+    editSelectedTags.push(tag);
+    input.value = '';
+    renderEditTagPicker();
+    renderTagPicker();
+}
+
+async function generateEditExample() {
+    if (!requireKeys(['openai'])) return;
+    const word = document.getElementById('edit-word').value.trim();
+    if (!word) { showToast('Enter a word first'); return; }
+    const prev = document.getElementById('edit-example-preview');
+    prev.innerHTML = '<span>Generating...</span>';
+    try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: `Write one short, natural example sentence in colloquial Brazilian Portuguese using "${word}". Return ONLY the Portuguese sentence followed by its English translation in parentheses.` }],
+                temperature: 0.7, max_tokens: 120
+            })
+        });
+        const data = await res.json();
+        editGeneratedExample = data.choices[0].message.content.trim();
+        const ptPart = editGeneratedExample.split('(')[0].trim().replace(/'/g, "\\'");
+        prev.innerHTML = `<span style="font-style:italic;color:var(--text);flex:1">${editGeneratedExample}</span>
+            <button class="speak-btn speak-inline" onclick="speak('${ptPart}','pt-BR')">🔊</button>`;
+    } catch(e) {
+        prev.innerHTML = '<span style="color:#ff6b6b">Failed — check your OpenAI key.</span>';
+    }
+}
+
+function saveEdit() {
+    if (!editingId) return;
+    const words = getNotes();
+    const i = words.findIndex(w => w.id === editingId);
+    if (i === -1) return;
+    words[i].word        = document.getElementById('edit-word').value.trim() || words[i].word;
+    words[i].translation = document.getElementById('edit-translation').value.trim();
+    words[i].tags        = [...editSelectedTags];
+    words[i].example     = editGeneratedExample || words[i].example;
+    saveNotes(words);
+    closeEditModal();
+    renderNotepad();
+    showToast('Word updated!');
+}
+
+function flipReviewCard() { reviewFlipped = true; renderReviewCard(); }
+
+function rateWord(rating) {
+    const w = reviewQueue[reviewIdx];
+    const dayMs = 86400000;
+    const nextDays = rating === 'forgot' ? 1 : rating === 'hard' ? 3 : Math.min((w.reviewInterval || 1) * 2, 30);
+    const words = getNotes();
+    const i = words.findIndex(x => x.id === w.id);
+    if (i !== -1) {
+        words[i].lastReviewed   = Date.now();
+        words[i].nextReview     = Date.now() + nextDays * dayMs;
+        words[i].reviewInterval = nextDays;
+    }
+    saveNotes(words);
+    reviewIdx++;
+    reviewFlipped = false;
+    renderReviewCard();
+}
 
 // ─────────────────────────────────────────
 // VOCAB BUILDER MODULE
@@ -1568,7 +2030,9 @@ function closeGrammarViewer() {
 // ─────────────────────────────────────────
 loadSettingsUI();
 renderLessons();
+renderTagPicker();
 renderNotepad();
+updateReviewBtn();
 renderGrammarGrid('grammar-prelim',    grammarPrelim);
 renderGrammarGrid('grammar-main',      grammarMain);
 renderGrammarGrid('grammar-readings',  grammarReadings);
