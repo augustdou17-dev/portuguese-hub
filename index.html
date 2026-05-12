@@ -502,12 +502,12 @@
         <div class="section-title">🃏 Vocabulary Builder</div>
         <p class="section-subtitle">High-frequency Brazilian Portuguese words — click the card to reveal the translation</p>
         <div class="vocab-controls">
-            <select id="vocab-level">
+            <select id="vocab-level" onchange="renderVocabStats()">
                 <option value="beginner">Beginner (A1–A2)</option>
                 <option value="intermediate" selected>Intermediate (B1–B2)</option>
                 <option value="advanced">Advanced (C1–C2)</option>
             </select>
-            <select id="vocab-topic">
+            <select id="vocab-topic" onchange="renderVocabStats()">
                 <option value="everyday">Everyday life</option>
                 <option value="food">Food &amp; restaurants</option>
                 <option value="travel">Travel &amp; directions</option>
@@ -518,6 +518,7 @@
             </select>
             <button class="btn btn-primary" onclick="generateVocab()">New Set</button>
         </div>
+        <div id="vocab-stats" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:0.85rem;color:var(--muted);margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;"></div>
         <div id="vocab-container" class="flashcard-wrapper">
             <div class="loading"><div class="spinner"></div>Generating vocabulary...</div>
         </div>
@@ -979,7 +980,6 @@ document.getElementById('word-input').addEventListener('keydown', e => { if (e.k
 let vocabCards = [];
 let currentCard = 0;
 let knownCount = 0;
-
 const topicMap = {
     everyday: 'everyday life, greetings, and common situations in Brazil',
     food:     'food, restaurants, drinks, and Brazilian cuisine',
@@ -992,11 +992,76 @@ const topicMap = {
 
 const levelMap = { beginner: 'A1-A2', intermediate: 'B1-B2', advanced: 'C1-C2' };
 
+// localStorage helpers — all vocab progress is stored per level+topic
+function vocabSeenKey(level, topic)    { return `vocab-seen-${level}-${topic}`; }
+function vocabLearnedKey(level, topic) { return `vocab-learned-${level}-${topic}`; }
+
+function getSeenWords(level, topic) {
+    return JSON.parse(localStorage.getItem(vocabSeenKey(level, topic)) || '[]');
+}
+function getLearnedWords(level, topic) {
+    return JSON.parse(localStorage.getItem(vocabLearnedKey(level, topic)) || '[]');
+}
+function saveSeenWords(level, topic, words) {
+    localStorage.setItem(vocabSeenKey(level, topic), JSON.stringify(words));
+}
+function saveLearnedWord(level, topic, card) {
+    const learned = getLearnedWords(level, topic);
+    if (!learned.find(w => w.word === card.word)) {
+        learned.push(card);
+        localStorage.setItem(vocabLearnedKey(level, topic), JSON.stringify(learned));
+    }
+}
+
+function getTotalLearned() {
+    let total = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('vocab-learned-')) {
+            total += JSON.parse(localStorage.getItem(key) || '[]').length;
+        }
+    }
+    return total;
+}
+
+function renderVocabStats() {
+    const level   = document.getElementById('vocab-level').value;
+    const topic   = document.getElementById('vocab-topic').value;
+    const learned = getLearnedWords(level, topic).length;
+    const seen    = getSeenWords(level, topic).length;
+    const total   = getTotalLearned();
+    const el      = document.getElementById('vocab-stats');
+    if (el) el.innerHTML = `
+        <span>✓ <strong>${learned}</strong> learned in this category</span>
+        <span style="color:var(--muted)">·</span>
+        <span>${seen} seen total</span>
+        <span style="color:var(--muted)">·</span>
+        <span>🏆 <strong>${total}</strong> words learned across all categories</span>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:0.78rem;margin-left:8px" onclick="resetVocabProgress()">Reset this category</button>`;
+}
+
+function resetVocabProgress() {
+    const level = document.getElementById('vocab-level').value;
+    const topic = document.getElementById('vocab-topic').value;
+    if (!confirm('Reset all progress for this category? This cannot be undone.')) return;
+    localStorage.removeItem(vocabSeenKey(level, topic));
+    localStorage.removeItem(vocabLearnedKey(level, topic));
+    renderVocabStats();
+    generateVocab();
+}
+
 async function generateVocab() {
     if (!requireKeys(['openai'])) return;
     const level = document.getElementById('vocab-level').value;
     const topic = document.getElementById('vocab-topic').value;
-    document.getElementById('vocab-container').innerHTML = '<div class="loading"><div class="spinner"></div>Generating vocabulary set...</div>';
+
+    renderVocabStats();
+    document.getElementById('vocab-container').innerHTML = '<div class="loading"><div class="spinner"></div>Generating new vocabulary set...</div>';
+
+    const seenWords = getSeenWords(level, topic);
+    const avoidClause = seenWords.length
+        ? `\n\nIMPORTANT: Do NOT include any of these already-seen words: ${seenWords.join(', ')}.`
+        : '';
 
     try {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -1006,18 +1071,20 @@ async function generateVocab() {
                 model: 'gpt-4o-mini',
                 messages: [{
                     role: 'user',
-                    content: `Generate exactly 10 high-frequency Brazilian Portuguese vocabulary items for ${levelMap[level]} learners on the topic: "${topicMap[topic]}".
+                    content: `Generate exactly 10 Brazilian Portuguese vocabulary items for ${levelMap[level]} learners on the topic: "${topicMap[topic]}".${avoidClause}
 
-Return ONLY a valid JSON array with no extra text, using this exact format:
+Choose varied, useful words — mix common verbs, nouns, adjectives, and expressions. Use natural Brazilian Portuguese, not formal textbook language.
+
+Return ONLY a valid JSON array with no extra text:
 [
   {
     "word": "Portuguese word or short phrase",
     "translation": "English meaning",
-    "example": "Short example sentence in Portuguese. (English translation in parentheses.)"
+    "example": "Natural example sentence in Brazilian Portuguese. (English translation in parentheses.)"
   }
 ]`
                 }],
-                temperature: 0.7,
+                temperature: 1.0,
                 max_tokens: 900
             })
         });
@@ -1026,6 +1093,11 @@ Return ONLY a valid JSON array with no extra text, using this exact format:
         const start = raw.indexOf('[');
         const end   = raw.lastIndexOf(']') + 1;
         vocabCards  = JSON.parse(raw.slice(start, end));
+
+        // persist seen words
+        const updated = [...new Set([...seenWords, ...vocabCards.map(c => c.word)])];
+        saveSeenWords(level, topic, updated);
+
         currentCard = 0;
         knownCount  = 0;
         renderFlashcard();
@@ -1039,15 +1111,21 @@ function renderFlashcard() {
     const container = document.getElementById('vocab-container');
     if (!vocabCards.length) return;
 
+    const level = document.getElementById('vocab-level').value;
+    const topic = document.getElementById('vocab-topic').value;
+    const totalLearned = getLearnedWords(level, topic).length;
+
     if (currentCard >= vocabCards.length) {
         const pct = Math.round((knownCount / vocabCards.length) * 100);
         container.innerHTML = `
             <div class="empty-state">
                 <div class="icon">🎉</div>
                 <div class="title">Set complete!</div>
-                <div style="margin-bottom:20px">You knew <strong>${knownCount}</strong> of ${vocabCards.length} words (${pct}%)</div>
-                <button class="btn btn-primary" onclick="generateVocab()">Generate New Set</button>
+                <div style="margin-bottom:6px">You knew <strong>${knownCount}</strong> of ${vocabCards.length} words this round (${pct}%)</div>
+                <div style="color:var(--muted);font-size:0.88rem;margin-bottom:20px">Total learned in this category: <strong>${totalLearned}</strong></div>
+                <button class="btn btn-primary" onclick="generateVocab()">Next Set →</button>
             </div>`;
+        renderVocabStats();
         return;
     }
 
@@ -1056,7 +1134,7 @@ function renderFlashcard() {
     const safeWord = card.word.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 
     container.innerHTML = `
-        <div class="flashcard-counter">Card ${currentCard + 1} of ${vocabCards.length} &nbsp;·&nbsp; ${knownCount} known</div>
+        <div class="flashcard-counter">Card ${currentCard + 1} of ${vocabCards.length} &nbsp;·&nbsp; ${knownCount} known this round &nbsp;·&nbsp; ${totalLearned} total learned</div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progress}%"></div></div>
         <div class="flashcard" id="flashcard" onclick="flipCard()">
             <div class="flashcard-inner">
@@ -1080,7 +1158,12 @@ function renderFlashcard() {
 function flipCard() { document.getElementById('flashcard').classList.toggle('flipped'); }
 
 function nextCard(knew) {
-    if (knew) knownCount++;
+    const level = document.getElementById('vocab-level').value;
+    const topic = document.getElementById('vocab-topic').value;
+    if (knew) {
+        knownCount++;
+        saveLearnedWord(level, topic, vocabCards[currentCard]);
+    }
     currentCard++;
     renderFlashcard();
 }
