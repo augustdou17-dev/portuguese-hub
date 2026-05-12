@@ -1218,10 +1218,19 @@ function renderFlashcard() {
         <div class="flashcard-nav">
             <button class="btn nav-btn btn-skip" onclick="nextCard(false)">✗ Still learning</button>
             <button class="btn nav-btn btn-know" onclick="nextCard(true)">✓ I know this</button>
-        </div>`;
+        </div>
+        <button class="btn btn-secondary" style="font-size:0.82rem;padding:7px 16px;" onclick="saveVocabToNotepad(${currentCard})">📝 Save to Notepad</button>`;
 }
 
 function flipCard() { document.getElementById('flashcard').classList.toggle('flipped'); }
+
+function saveVocabToNotepad(index) {
+    const card = vocabCards[index];
+    if (!card) return;
+    addWordToStore(card.word, card.translation);
+    renderNotepad();
+    showToast(`"${card.word}" saved to Notepad!`);
+}
 
 function nextCard(knew) {
     const level = document.getElementById('vocab-level').value;
