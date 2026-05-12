@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portuguese Learning Hub</title>
+    <style>
+        :root {
+            --green: #1a7a1a;
+            --red: #c41230;
+            --bg: #111318;
+            --surface: #1c2030;
+            --surface2: #252b3b;
+            --border: #2e3450;
+            --text: #e4e8f0;
+            --muted: #8890aa;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--surface);
+            border-bottom: 3px solid var(--green);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 60px;
+            gap: 12px;
+        }
+        .header-flag { font-size: 1.6rem; }
+        header h1 { font-size: 1.25rem; font-weight: 600; }
+        header h1 span { color: #4adf4a; }
+
+        /* NAV */
+        nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            padding: 0 24px;
+            gap: 2px;
+            overflow-x: auto;
+        }
+        .tab-btn {
+            padding: 12px 18px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 500;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            margin-bottom: -1px;
+        }
+        .tab-btn:hover { color: var(--text); background: var(--surface2); }
+        .tab-btn.active { color: #4adf4a; border-bottom-color: #4adf4a; }
+
+        /* MAIN */
+        main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* TYPOGRAPHY */
+        .section-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 6px; }
+        .section-subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+
+        /* BUTTONS */
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary { background: var(--green); color: white; }
+        .btn-primary:hover { background: #1d8a1d; }
+        .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-danger { background: transparent; color: #ff6b6b; border: 1px solid #ff6b6b44; padding: 5px 12px; font-size: 0.82rem; }
+        .btn-danger:hover { background: #ff6b6b22; }
+
+        /* INPUTS */
+        input[type="text"], textarea, select {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+            font-family: inherit;
+        }
+        input[type="text"]:focus, textarea:focus, select:focus { border-color: var(--green); }
+        select option { background: var(--surface2); }
+
+        /* YOUTUBE TAB */
+        .search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
+        .search-bar input { flex: 1; }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+        }
+        .video-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .video-card:hover { transform: translateY(-3px); border-color: var(--green); }
+        .video-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+        .video-info { padding: 12px; }
+        .video-title {
+            font-size: 0.88rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .video-date { font-size: 0.78rem; color: var(--muted); }
+        .load-more { text-align: center; margin-top: 28px; }
+
+        /* VIDEO MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.88);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: var(--surface); border-radius: 14px; width: 100%; max-width: 840px; overflow: hidden; }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-title { font-size: 0.93rem; font-weight: 500; flex: 1; margin-right: 12px; }
+        .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.3rem; padding: 4px; }
+        .modal-close:hover { color: var(--text); }
+        .modal-player { width: 100%; aspect-ratio: 16/9; display: block; border: none; }
+
+        /* TÁ FALADO TAB */
+        .lesson-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .lesson-tab-btn {
+            padding: 8px 18px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .lesson-tab-btn.active { background: var(--green); color: white; border-color: var(--green); }
+        .lesson-list { display: flex; flex-direction: column; gap: 12px; }
+        .lesson-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .lesson-number {
+            background: var(--green);
+            color: white;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .lesson-info { flex: 1; min-width: 160px; }
+        .lesson-title { font-weight: 500; margin-bottom: 4px; }
+        .lesson-meta { font-size: 0.8rem; color: var(--muted); }
+        .lesson-audio { width: 100%; margin-top: 12px; display: none; }
+        .lesson-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+        /* TRANSLATOR TAB */
+        .translator-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 16px;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 640px) { .translator-grid { grid-template-columns: 1fr; } }
+        .translator-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+        .translator-label { font-size: 0.78rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+        .translator-box textarea { border: none; background: transparent; min-height: 140px; resize: vertical; padding: 0; }
+        .swap-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: center;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .swap-btn:hover { background: var(--border); }
+        .translator-result { color: var(--text); min-height: 140px; line-height: 1.6; white-space: pre-wrap; }
+        .result-actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .translator-actions { display: flex; gap: 10px; }
+
+        /* NOTEPAD TAB */
+        .add-word-form { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .add-word-form h3 { margin-bottom: 14px; font-size: 1rem; font-weight: 600; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .word-list { display: flex; flex-direction: column; gap: 10px; }
+        .word-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .word-card-content { flex: 1; }
+        .word-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
+        .word-note { font-size: 0.85rem; color: var(--muted); }
+        .word-card-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+        .speak-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .speak-btn:hover { background: var(--green); border-color: var(--green); }
+
+        /* VOCAB BUILDER TAB */
+        .vocab-controls { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+        .vocab-controls select { width: auto; min-width: 180px; }
+        .flashcard-wrapper { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .flashcard-counter { color: var(--muted); font-size: 0.88rem; }
+        .progress-bar-wrap { width: 100%; max-width: 520px; background: var(--surface2); border-radius: 4px; height: 6px; }
+        .progress-bar-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.4s; }
+        .flashcard {
+            width: 100%;
+            max-width: 520px;
+            min-height: 260px;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            min-height: 260px;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            min-height: 260px;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            border-radius: 18px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+        }
+        .flashcard:hover .flashcard-front,
+        .flashcard:hover .flashcard-back { border-color: var(--green); }
+        .flashcard-back { transform: rotateY(180deg); }
+        .flashcard-word { font-size: 2rem; font-weight: 700; margin-bottom: 12px; text-align: center; }
+        .flashcard-hint { color: var(--muted); font-size: 0.85rem; }
+        .flashcard-translation { font-size: 1.5rem; font-weight: 600; margin-bottom: 12px; text-align: center; color: #4adf4a; }
+        .flashcard-example { font-size: 0.9rem; color: var(--muted); text-align: center; font-style: italic; line-height: 1.6; }
+        .flashcard-nav { display: flex; gap: 16px; }
+        .nav-btn { padding: 12px 28px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .btn-know { background: #1a7a1a22; color: #4adf4a; border: 1px solid #4adf4a55; }
+        .btn-know:hover { background: #1a7a1a44; }
+        .btn-skip { background: #7a1a1a22; color: #df6060; border: 1px solid #df606055; }
+        .btn-skip:hover { background: #7a1a1a44; }
+
+        /* LOADING & EMPTY */
+        .loading { text-align: center; padding: 48px; color: var(--muted); }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .empty-state .title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--green);
+            color: var(--text);
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            z-index: 9999;
+            transform: translateY(80px);
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        /* GRAMMAR TAB */
+        .grammar-sections { display: flex; flex-direction: column; gap: 32px; }
+        .grammar-group-title { font-size: 1rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+        .grammar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+        .grammar-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.2s;
+        }
+        .grammar-card:hover { border-color: var(--green); }
+        .grammar-card-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--green); }
+        .grammar-card-title { font-size: 0.9rem; font-weight: 500; line-height: 1.4; flex: 1; }
+        .grammar-card-actions { display: flex; gap: 6px; }
+        .grammar-viewer-header {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--surface); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        @media (max-width: 600px) {
+            main { padding: 20px 16px; }
+            .video-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <span class="header-flag">🇧🇷</span>
+    <h1>Portuguese <span>Learning Hub</span></h1>
+</header>
+
+<nav>
+    <button class="tab-btn active" data-tab="youtube">🎬 Easy Portuguese</button>
+    <button class="tab-btn" data-tab="tafalado">🎙️ Tá Falado</button>
+    <button class="tab-btn" data-tab="translator">🔤 Translator</button>
+    <button class="tab-btn" data-tab="notepad">📝 Notepad</button>
+    <button class="tab-btn" data-tab="vocab">🃏 Vocab Builder</button>
+    <button class="tab-btn" data-tab="grammar">📖 Grammar Lessons</button>
+</nav>
+
+<main>
+
+    <!-- ===== EASY PORTUGUESE ===== -->
+    <div class="tab-panel active" id="tab-youtube">
+        <div class="section-title">🎬 Easy Portuguese</div>
+        <p class="section-subtitle">Browse and watch videos from the Easy Portuguese YouTube channel</p>
+        <div class="search-bar">
+            <input type="text" id="yt-search" placeholder="Search videos within the channel..." />
+            <button class="btn btn-primary" onclick="searchYoutube()">Search</button>
+            <button class="btn btn-secondary" onclick="loadChannelVideos()">All Videos</button>
+        </div>
+        <div id="video-grid" class="video-grid"></div>
+        <div class="load-more" id="load-more-wrap" style="display:none">
+            <button class="btn btn-secondary" onclick="loadMoreVideos()">Load More</button>
+        </div>
+    </div>
+
+    <!-- ===== TÁ FALADO ===== -->
+    <div class="tab-panel" id="tab-tafalado">
+        <div class="section-title">🎙️ Tá Falado</div>
+        <p class="section-subtitle">Free Brazilian Portuguese podcasts — pronunciation and grammar for Spanish speakers</p>
+        <div class="lesson-tabs">
+            <button class="lesson-tab-btn active" onclick="filterLessons('pronunciation', this)">Pronunciation (24)</button>
+            <button class="lesson-tab-btn" onclick="filterLessons('grammar', this)">Grammar (20)</button>
+        </div>
+        <div id="lesson-list" class="lesson-list"></div>
+    </div>
+
+    <!-- ===== TRANSLATOR ===== -->
+    <div class="tab-panel" id="tab-translator">
+        <div class="section-title">🔤 AI Translator</div>
+        <p class="section-subtitle">Powered by OpenAI — press Ctrl+Enter or click Translate</p>
+        <div class="translator-grid">
+            <div class="translator-box">
+                <div class="translator-label" id="src-lang-label">English</div>
+                <textarea id="translate-input" placeholder="Type text to translate..." rows="6"></textarea>
+            </div>
+            <button class="swap-btn" onclick="swapLanguage()" title="Swap languages">⇄</button>
+            <div class="translator-box">
+                <div class="translator-label" id="tgt-lang-label">Portuguese</div>
+                <div class="translator-result" id="translate-output">Translation will appear here...</div>
+                <div class="result-actions" id="result-actions" style="display:none">
+                    <button class="btn btn-secondary" onclick="speakTranslation()">🔊 Listen</button>
+                    <button class="btn btn-secondary" onclick="saveTranslationToNotepad()">📝 Save to Notepad</button>
+                </div>
+            </div>
+        </div>
+        <div class="translator-actions">
+            <button class="btn btn-primary" onclick="translate()">Translate</button>
+            <button class="btn btn-secondary" onclick="clearTranslator()">Clear</button>
+        </div>
+    </div>
+
+    <!-- ===== NOTEPAD ===== -->
+    <div class="tab-panel" id="tab-notepad">
+        <div class="section-title">📝 Vocabulary Notepad</div>
+        <p class="section-subtitle">Save words and expressions — click 🔊 to hear the pronunciation</p>
+        <div class="add-word-form">
+            <h3>Add a word or expression</h3>
+            <div class="form-row">
+                <input type="text" id="word-input" placeholder="Word or phrase in Portuguese" />
+                <button class="btn btn-primary" onclick="addWord()">Add</button>
+            </div>
+            <input type="text" id="note-input" placeholder="Notes, translation, or context (optional)" />
+        </div>
+        <div id="word-list" class="word-list"></div>
+    </div>
+
+    <!-- ===== VOCAB BUILDER ===== -->
+    <div class="tab-panel" id="tab-vocab">
+        <div class="section-title">🃏 Vocabulary Builder</div>
+        <p class="section-subtitle">High-frequency Brazilian Portuguese words — click the card to reveal the translation</p>
+        <div class="vocab-controls">
+            <select id="vocab-level">
+                <option value="beginner">Beginner (A1–A2)</option>
+                <option value="intermediate" selected>Intermediate (B1–B2)</option>
+                <option value="advanced">Advanced (C1–C2)</option>
+            </select>
+            <select id="vocab-topic">
+                <option value="everyday">Everyday life</option>
+                <option value="food">Food &amp; restaurants</option>
+                <option value="travel">Travel &amp; directions</option>
+                <option value="emotions">Feelings &amp; emotions</option>
+                <option value="work">Work &amp; business</option>
+                <option value="verbs">High-frequency verbs</option>
+                <option value="slang">Brazilian slang &amp; expressions</option>
+            </select>
+            <button class="btn btn-primary" onclick="generateVocab()">New Set</button>
+        </div>
+        <div id="vocab-container" class="flashcard-wrapper">
+            <div class="loading"><div class="spinner"></div>Generating vocabulary...</div>
+        </div>
+    </div>
+
+</main>
+
+    <!-- ===== GRAMMAR LESSONS ===== -->
+    <div class="tab-panel" id="tab-grammar">
+        <div class="section-title">📖 Grammar Lessons</div>
+        <p class="section-subtitle">Português para Principiantes — University of Wisconsin · 30 lessons with dialogues and cultural readings</p>
+
+        <div class="grammar-sections">
+
+            <div class="grammar-group">
+                <div class="grammar-group-title">Preliminary Lessons</div>
+                <div class="grammar-grid" id="grammar-prelim"></div>
+            </div>
+
+            <div class="grammar-group">
+                <div class="grammar-group-title">Lições 1–30 &amp; Dialogues</div>
+                <div class="grammar-grid" id="grammar-main"></div>
+            </div>
+
+            <div class="grammar-group">
+                <div class="grammar-group-title">Cultural Reading Selections</div>
+                <div class="grammar-grid" id="grammar-readings"></div>
+            </div>
+        </div>
+
+        <!-- inline iframe viewer -->
+        <div id="grammar-viewer" style="display:none;margin-top:28px">
+            <div class="grammar-viewer-header">
+                <span id="grammar-viewer-title" style="font-weight:600;font-size:0.95rem;"></span>
+                <div style="display:flex;gap:8px">
+                    <a id="grammar-open-tab" href="#" target="_blank" class="btn btn-secondary" style="font-size:0.82rem;padding:7px 14px;text-decoration:none;">Open in new tab ↗</a>
+                    <button class="btn btn-secondary" onclick="closeGrammarViewer()" style="font-size:0.82rem;padding:7px 14px;">✕ Close</button>
+                </div>
+            </div>
+            <iframe id="grammar-iframe" src="" style="width:100%;height:680px;border:none;border-radius:0 0 12px 12px;background:white;"></iframe>
+        </div>
+    </div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-overlay" id="video-modal" onclick="closeModalBackdrop(event)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title"></div>
+            <button class="modal-close" onclick="closeVideoModal()">✕</button>
+        </div>
+        <iframe class="modal-player" id="modal-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────
+const YT_KEY     = 'AIzaSyBLZ_3h3tT0IEd7zeJcoe3j5eFkZpEtaQE';
+const OPENAI_KEY = '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';
+const TF_BASE    = 'https://www.coerll.utexas.edu/brazilpod/tafalado/';
+
+// ─────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+// ─────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─────────────────────────────────────────
+// YOUTUBE MODULE
+// ─────────────────────────────────────────
+let ytChannelId = '';
+let ytNextPageToken = '';
+let ytCurrentQuery = '';
+
+async function findChannelId() {
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=Easy+Portuguese+language&type=channel&maxResults=10&key=${YT_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.items) return null;
+    const match = data.items.find(i =>
+        i.snippet.channelTitle.toLowerCase().replace(/\s/g,'') === 'easyportuguese'
+    ) || data.items.find(i =>
+        i.snippet.channelTitle.toLowerCase().includes('easy portuguese')
+    );
+    return match ? match.id.channelId : null;
+}
+
+async function loadChannelVideos() {
+    document.getElementById('yt-search').value = '';
+    ytCurrentQuery = '';
+    ytNextPageToken = '';
+    document.getElementById('video-grid').innerHTML = '<div class="loading"><div class="spinner"></div>Loading videos...</div>';
+    document.getElementById('load-more-wrap').style.display = 'none';
+
+    if (!ytChannelId) {
+        ytChannelId = await findChannelId();
+    }
+    if (!ytChannelId) {
+        document.getElementById('video-grid').innerHTML =
+            '<div class="empty-state"><div class="icon">⚠️</div><div class="title">Channel not found</div>Check your YouTube API key.</div>';
+        return;
+    }
+    fetchVideos();
+}
+
+async function searchYoutube() {
+    const q = document.getElementById('yt-search').value.trim();
+    if (!q) { loadChannelVideos(); return; }
+    ytCurrentQuery = q;
+    ytNextPageToken = '';
+    document.getElementById('video-grid').innerHTML = '<div class="loading"><div class="spinner"></div>Searching...</div>';
+    document.getElementById('load-more-wrap').style.display = 'none';
+    fetchVideos();
+}
+
+async function fetchVideos(append = false) {
+    let url;
+    if (ytCurrentQuery && ytChannelId) {
+        url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${ytChannelId}&q=${encodeURIComponent(ytCurrentQuery)}&type=video&maxResults=12&key=${YT_KEY}`;
+    } else if (ytChannelId) {
+        url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${ytChannelId}&type=video&order=date&maxResults=12&key=${YT_KEY}`;
+    } else {
+        url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent((ytCurrentQuery || 'Easy Portuguese') + ' site:youtube.com')}&type=video&maxResults=12&key=${YT_KEY}`;
+    }
+    if (ytNextPageToken) url += `&pageToken=${ytNextPageToken}`;
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.items || data.items.length === 0) {
+            document.getElementById('video-grid').innerHTML =
+                '<div class="empty-state"><div class="icon">🎬</div><div class="title">No videos found</div>Try a different search term.</div>';
+            return;
+        }
+
+        ytNextPageToken = data.nextPageToken || '';
+        const grid = document.getElementById('video-grid');
+        if (!append) grid.innerHTML = '';
+
+        data.items.forEach(item => {
+            const vid   = item.id.videoId;
+            const title = item.snippet.title;
+            const thumb = item.snippet.thumbnails.medium.url;
+            const date  = new Date(item.snippet.publishedAt).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+            const safeTitle = title.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            grid.innerHTML += `
+                <div class="video-card" onclick="openVideo('${vid}','${safeTitle}')">
+                    <img class="video-thumb" src="${thumb}" alt="" loading="lazy" />
+                    <div class="video-info">
+                        <div class="video-title">${title}</div>
+                        <div class="video-date">${date}</div>
+                    </div>
+                </div>`;
+        });
+
+        document.getElementById('load-more-wrap').style.display = ytNextPageToken ? 'block' : 'none';
+    } catch (e) {
+        document.getElementById('video-grid').innerHTML =
+            '<div class="empty-state"><div class="icon">⚠️</div><div class="title">Error loading videos</div>Check your YouTube API key.</div>';
+    }
+}
+
+function loadMoreVideos() { fetchVideos(true); }
+
+document.getElementById('yt-search').addEventListener('keydown', e => { if (e.key === 'Enter') searchYoutube(); });
+
+function openVideo(videoId, title) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    document.getElementById('video-modal').classList.add('open');
+}
+function closeVideoModal() {
+    document.getElementById('video-modal').classList.remove('open');
+    document.getElementById('modal-iframe').src = '';
+}
+function closeModalBackdrop(e) { if (e.target.id === 'video-modal') closeVideoModal(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideoModal(); });
+
+// ─────────────────────────────────────────
+// TÁ FALADO MODULE
+// ─────────────────────────────────────────
+const pronunciationLessons = [
+    { num: '01', title: 'Pronunciation of /i/' },
+    { num: '02', title: 'Pronunciation of /u/' },
+    { num: '03', title: 'Pronunciation of /é/ and /ê/' },
+    { num: '04', title: 'Pronunciation of Open /ó/ and Closed /ô/' },
+    { num: '05', title: 'Pronunciation of /a/, Stressed and Unstressed' },
+    { num: '06', title: 'Pronunciation of Oral Diphthongs' },
+    { num: '07', title: 'Pronunciation of Nasal Vowels /ã/ and /ão/' },
+    { num: '08', title: 'Pronunciation of Nasal Diphthong /ẽi/' },
+    { num: '09', title: 'Pronunciation of /b/ and /v/' },
+    { num: '10', title: 'Pronunciation of /t/ and /d/' },
+    { num: '11', title: 'Pronunciation of /lh/' },
+    { num: '12', title: 'Pronunciation of /nh/' },
+    { num: '13', title: "Pronunciation of 's' and 'z' Sounds" },
+    { num: '14', title: 'Pronunciation of the Soft /r/' },
+    { num: '15', title: 'Pronunciation of the Hard /rr/' },
+    { num: '16', title: 'Pronunciation of /x/' },
+    { num: '17', title: 'Pronunciation of /ch/' },
+    { num: '18', title: 'Stress Patterns in Portuguese' },
+    { num: '19', title: 'Pronunciation of Unstressed Vowels' },
+    { num: '20', title: 'Vowel Reduction in Brazilian Portuguese' },
+    { num: '21', title: 'Consonant Clusters' },
+    { num: '22', title: 'Intonation Patterns' },
+    { num: '23', title: 'Regional Accents of Brazil' },
+    { num: '24', title: 'Final Review — Sounds of Brazilian Portuguese' },
+];
+
+const grammarLessons = [
+    { num: '01', title: 'Gostar vs. Gustar' },
+    { num: '02', title: 'Contractions' },
+    { num: '03', "title": "Plurals with 'l'" },
+    { num: '04', title: 'Future Subjunctive' },
+    { num: '05', title: 'Disappearing Reflexive Verbs' },
+    { num: '06', title: "The Verb 'Ficar'" },
+    { num: '07', title: 'Para with Indirect Pronouns' },
+    { num: '08', title: 'Ser vs. Estar' },
+    { num: '09', title: 'Object Pronouns' },
+    { num: '10', title: 'Pretérito Perfeito — Past Tense' },
+    { num: '11', title: 'Imperfect vs. Preterite' },
+    { num: '12', title: 'The Personal Infinitive' },
+    { num: '13', title: 'Diminutives and Augmentatives' },
+    { num: '14', title: 'Relative Pronouns' },
+    { num: '15', title: 'Passive Voice' },
+    { num: '16', title: 'Subjunctive Mood' },
+    { num: '17', title: 'Conditional Sentences' },
+    { num: '18', title: 'Conjunctions and Connectors' },
+    { num: '19', title: 'Idiomatic Expressions' },
+    { num: '20', title: 'Final Review — Brazilian Portuguese Grammar' },
+];
+
+let currentLessonType = 'pronunciation';
+
+function filterLessons(type, btn) {
+    currentLessonType = type;
+    document.querySelectorAll('.lesson-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLessons();
+}
+
+function renderLessons() {
+    const lessons = currentLessonType === 'pronunciation' ? pronunciationLessons : grammarLessons;
+    const isGram  = currentLessonType === 'grammar';
+
+    document.getElementById('lesson-list').innerHTML = lessons.map((l, i) => {
+        const audioUrl = TF_BASE + (isGram ? `mp3/tafalado_gra_${l.num}.mp3` : `mp3/tafalado_${l.num}.mp3`);
+        const pdfUrl   = TF_BASE + (isGram ? `pdf/tafalado_gra_${l.num}.pdf` : `pdf/tafalado_${l.num}.pdf`);
+        return `
+        <div class="lesson-card" id="lcard-${i}">
+            <div class="lesson-number">${l.num}</div>
+            <div class="lesson-info">
+                <div class="lesson-title">${l.title}</div>
+                <div class="lesson-meta">${isGram ? 'Grammar' : 'Pronunciation'} · Tá Falado Podcast</div>
+                <audio id="laudio-${i}" class="lesson-audio" controls src="${audioUrl}" preload="none"></audio>
+            </div>
+            <div class="lesson-actions">
+                <button class="btn btn-secondary" onclick="toggleAudio(${i})" style="font-size:0.82rem;padding:8px 14px;">▶ Play</button>
+                <a href="${pdfUrl}" target="_blank" class="btn btn-secondary" style="font-size:0.82rem;padding:8px 14px;text-decoration:none;">📄 PDF</a>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleAudio(i) {
+    const audio = document.getElementById('laudio-' + i);
+    const isVisible = audio.style.display === 'block';
+    document.querySelectorAll('.lesson-audio').forEach(a => { a.style.display = 'none'; a.pause(); });
+    if (!isVisible) {
+        audio.style.display = 'block';
+        audio.play().catch(() => {});
+    }
+}
+
+// ─────────────────────────────────────────
+// TRANSLATOR MODULE
+// ─────────────────────────────────────────
+let translateDir = 'en-pt';
+let lastTranslation = '';
+
+function swapLanguage() {
+    translateDir = translateDir === 'en-pt' ? 'pt-en' : 'en-pt';
+    document.getElementById('src-lang-label').textContent = translateDir === 'en-pt' ? 'English' : 'Portuguese';
+    document.getElementById('tgt-lang-label').textContent = translateDir === 'en-pt' ? 'Portuguese' : 'English';
+    document.getElementById('translate-input').value = '';
+    document.getElementById('translate-output').textContent = 'Translation will appear here...';
+    document.getElementById('result-actions').style.display = 'none';
+    lastTranslation = '';
+}
+
+async function translate() {
+    const text = document.getElementById('translate-input').value.trim();
+    if (!text) return;
+    const output = document.getElementById('translate-output');
+    output.textContent = 'Translating...';
+    document.getElementById('result-actions').style.display = 'none';
+
+    const src = translateDir === 'en-pt' ? 'English' : 'Brazilian Portuguese';
+    const tgt = translateDir === 'en-pt' ? 'Brazilian Portuguese' : 'English';
+
+    try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: `Translate the following from ${src} to ${tgt}. Return only the translation, nothing else.\n\n"${text}"` }],
+                temperature: 0.2,
+                max_tokens: 500
+            })
+        });
+        const data = await res.json();
+        lastTranslation = data.choices[0].message.content.trim().replace(/^"|"$/g, '');
+        output.textContent = lastTranslation;
+        document.getElementById('result-actions').style.display = 'flex';
+    } catch (e) {
+        output.textContent = 'Translation failed. Check your OpenAI API key.';
+    }
+}
+
+function clearTranslator() {
+    document.getElementById('translate-input').value = '';
+    document.getElementById('translate-output').textContent = 'Translation will appear here...';
+    document.getElementById('result-actions').style.display = 'none';
+    lastTranslation = '';
+}
+
+function speakTranslation() {
+    if (!lastTranslation) return;
+    speak(lastTranslation, translateDir === 'en-pt' ? 'pt-BR' : 'en-US');
+}
+
+function saveTranslationToNotepad() {
+    if (!lastTranslation) return;
+    const source = document.getElementById('translate-input').value.trim();
+    addWordToStore(lastTranslation, source);
+    renderNotepad();
+    showToast('Saved to Notepad!');
+}
+
+document.getElementById('translate-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.ctrlKey) translate();
+});
+
+// ─────────────────────────────────────────
+// SPEECH
+// ─────────────────────────────────────────
+function speak(text, lang = 'pt-BR') {
+    if (!window.speechSynthesis) { showToast('Speech not supported in this browser'); return; }
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = lang;
+    utt.rate = 0.9;
+    window.speechSynthesis.speak(utt);
+}
+
+// ─────────────────────────────────────────
+// NOTEPAD MODULE
+// ─────────────────────────────────────────
+function addWordToStore(word, note = '') {
+    const words = JSON.parse(localStorage.getItem('pt-notepad') || '[]');
+    words.unshift({ word, note, id: Date.now() });
+    localStorage.setItem('pt-notepad', JSON.stringify(words));
+}
+
+function addWord() {
+    const word = document.getElementById('word-input').value.trim();
+    const note = document.getElementById('note-input').value.trim();
+    if (!word) return;
+    addWordToStore(word, note);
+    document.getElementById('word-input').value = '';
+    document.getElementById('note-input').value = '';
+    renderNotepad();
+    showToast('Word saved!');
+}
+
+function deleteWord(id) {
+    const words = JSON.parse(localStorage.getItem('pt-notepad') || '[]').filter(w => w.id !== id);
+    localStorage.setItem('pt-notepad', JSON.stringify(words));
+    renderNotepad();
+}
+
+function renderNotepad() {
+    const words = JSON.parse(localStorage.getItem('pt-notepad') || '[]');
+    const list = document.getElementById('word-list');
+    if (!words.length) {
+        list.innerHTML = '<div class="empty-state"><div class="icon">📝</div><div class="title">No words yet</div>Add a word above or save from the Translator.</div>';
+        return;
+    }
+    list.innerHTML = words.map(w => `
+        <div class="word-card">
+            <div class="word-card-content">
+                <div class="word-text">${w.word}</div>
+                ${w.note ? `<div class="word-note">${w.note}</div>` : ''}
+            </div>
+            <div class="word-card-actions">
+                <button class="speak-btn" onclick="speak('${w.word.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','pt-BR')" title="Hear pronunciation">🔊</button>
+                <button class="btn btn-danger" onclick="deleteWord(${w.id})">Delete</button>
+            </div>
+        </div>`).join('');
+}
+
+document.getElementById('word-input').addEventListener('keydown', e => { if (e.key === 'Enter') addWord(); });
+
+// ─────────────────────────────────────────
+// VOCAB BUILDER MODULE
+// ─────────────────────────────────────────
+let vocabCards = [];
+let currentCard = 0;
+let knownCount = 0;
+
+const topicMap = {
+    everyday: 'everyday life, greetings, and common situations in Brazil',
+    food:     'food, restaurants, drinks, and Brazilian cuisine',
+    travel:   'travel, public transport, and asking for directions',
+    emotions: 'feelings, emotions, and expressing opinions',
+    work:     'work, business, and professional settings',
+    verbs:    'the most common and useful Brazilian Portuguese verbs',
+    slang:    'popular Brazilian slang, expressions, and informal speech'
+};
+
+const levelMap = { beginner: 'A1-A2', intermediate: 'B1-B2', advanced: 'C1-C2' };
+
+async function generateVocab() {
+    const level = document.getElementById('vocab-level').value;
+    const topic = document.getElementById('vocab-topic').value;
+    document.getElementById('vocab-container').innerHTML = '<div class="loading"><div class="spinner"></div>Generating vocabulary set...</div>';
+
+    try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [{
+                    role: 'user',
+                    content: `Generate exactly 10 high-frequency Brazilian Portuguese vocabulary items for ${levelMap[level]} learners on the topic: "${topicMap[topic]}".
+
+Return ONLY a valid JSON array with no extra text, using this exact format:
+[
+  {
+    "word": "Portuguese word or short phrase",
+    "translation": "English meaning",
+    "example": "Short example sentence in Portuguese. (English translation in parentheses.)"
+  }
+]`
+                }],
+                temperature: 0.7,
+                max_tokens: 900
+            })
+        });
+        const data = await res.json();
+        const raw = data.choices[0].message.content.trim();
+        const start = raw.indexOf('[');
+        const end   = raw.lastIndexOf(']') + 1;
+        vocabCards  = JSON.parse(raw.slice(start, end));
+        currentCard = 0;
+        knownCount  = 0;
+        renderFlashcard();
+    } catch (e) {
+        document.getElementById('vocab-container').innerHTML =
+            '<div class="empty-state"><div class="icon">⚠️</div><div class="title">Failed to load vocabulary</div>Check your OpenAI API key and try again.</div>';
+    }
+}
+
+function renderFlashcard() {
+    const container = document.getElementById('vocab-container');
+    if (!vocabCards.length) return;
+
+    if (currentCard >= vocabCards.length) {
+        const pct = Math.round((knownCount / vocabCards.length) * 100);
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="icon">🎉</div>
+                <div class="title">Set complete!</div>
+                <div style="margin-bottom:20px">You knew <strong>${knownCount}</strong> of ${vocabCards.length} words (${pct}%)</div>
+                <button class="btn btn-primary" onclick="generateVocab()">Generate New Set</button>
+            </div>`;
+        return;
+    }
+
+    const card     = vocabCards[currentCard];
+    const progress = (currentCard / vocabCards.length) * 100;
+    const safeWord = card.word.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+    container.innerHTML = `
+        <div class="flashcard-counter">Card ${currentCard + 1} of ${vocabCards.length} &nbsp;·&nbsp; ${knownCount} known</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progress}%"></div></div>
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <div class="flashcard-inner">
+                <div class="flashcard-front">
+                    <div class="flashcard-word">${card.word}</div>
+                    <div class="flashcard-hint">Click to reveal translation</div>
+                    <button class="speak-btn" style="margin-top:18px" onclick="event.stopPropagation();speak('${safeWord}','pt-BR')" title="Hear pronunciation">🔊</button>
+                </div>
+                <div class="flashcard-back">
+                    <div class="flashcard-translation">${card.translation}</div>
+                    <div class="flashcard-example">${card.example}</div>
+                </div>
+            </div>
+        </div>
+        <div class="flashcard-nav">
+            <button class="btn nav-btn btn-skip" onclick="nextCard(false)">✗ Still learning</button>
+            <button class="btn nav-btn btn-know" onclick="nextCard(true)">✓ I know this</button>
+        </div>`;
+}
+
+function flipCard() { document.getElementById('flashcard').classList.toggle('flipped'); }
+
+function nextCard(knew) {
+    if (knew) knownCount++;
+    currentCard++;
+    renderFlashcard();
+}
+
+// ─────────────────────────────────────────
+// GRAMMAR MODULE
+// ─────────────────────────────────────────
+const GRAMMAR_BASE = 'https://wisc.pb.unizin.org/portuguese/';
+
+const grammarPrelim = [
+    { label: 'Preliminary 1', title: 'First Preliminary Lesson',  slug: 'front-matter/first-preliminary-lesson/' },
+    { label: 'Preliminary 2', title: 'Second Preliminary Lesson', slug: 'front-matter/second-preliminary-lesson/' },
+    { label: 'Preliminary 3', title: 'Third Preliminary Lesson',  slug: 'front-matter/third-preliminary-lesson/' },
+    { label: 'Preliminary 4', title: 'Fourth Preliminary Lesson', slug: 'front-matter/fourth-preliminary-lesson/' },
+];
+
+const grammarMain = Array.from({ length: 30 }, (_, i) => {
+    const n = i + 1;
+    return [
+        { label: `Lição ${n}`,   title: `Grammar Lesson ${n}`, slug: `chapter/licao-${n}/` },
+        { label: `Diálogo ${n}`, title: `Dialogue ${n}`,       slug: `chapter/dialogo-${n}/` },
+    ];
+}).flat();
+
+const grammarReadings = [
+    { label: 'Reading', title: 'O único animal',           slug: 'chapter/o-unico-animal/' },
+    { label: 'Reading', title: 'O alfaiate João',          slug: 'chapter/o-alfaiate-joao/' },
+    { label: 'Reading', title: 'O pulo do gato',           slug: 'chapter/o-pulo-do-gato/' },
+    { label: 'Reading', title: 'O homem nu',               slug: 'chapter/o-homem-nu/' },
+    { label: 'Reading', title: 'Capoeira',                 slug: 'chapter/capoeira/' },
+    { label: 'Reading', title: 'O samba',                  slug: 'chapter/o-samba/' },
+    { label: 'Reading', title: 'O futebol',                slug: 'chapter/o-futebol/' },
+    { label: 'Reading', title: 'Portugal',                 slug: 'chapter/portugal/' },
+    { label: 'Reading', title: 'Candomblé',                slug: 'chapter/candomble/' },
+    { label: 'Reading', title: 'A diversidade brasileira', slug: 'chapter/a-diversidade-brasileira/' },
+    { label: 'Reading', title: 'Jogo do Bicho',            slug: 'chapter/jogo-do-bicho/' },
+    { label: 'Reading', title: 'A comida',                 slug: 'chapter/a-comida/' },
+    { label: 'Reading', title: 'As festas e os feriados',  slug: 'chapter/as-festas-e-os-feriados/' },
+    { label: 'Reading', title: 'O meio ambiente',          slug: 'chapter/o-meio-ambiente/' },
+    { label: 'Reading', title: 'Português no mundo',       slug: 'chapter/portugues-no-mundo/' },
+];
+
+function renderGrammarGrid(containerId, lessons) {
+    document.getElementById(containerId).innerHTML = lessons.map(l => {
+        const url = GRAMMAR_BASE + l.slug;
+        const safeTitle = l.title.replace(/'/g, "\\'");
+        const safeUrl   = url.replace(/'/g, "\\'");
+        return `
+        <div class="grammar-card">
+            <div class="grammar-card-label">${l.label}</div>
+            <div class="grammar-card-title">${l.title}</div>
+            <div class="grammar-card-actions">
+                <button class="btn btn-primary" style="font-size:0.82rem;padding:7px 14px;" onclick="openGrammarLesson('${safeUrl}','${safeTitle}')">Open</button>
+                <a href="${url}" target="_blank" class="btn btn-secondary" style="font-size:0.82rem;padding:7px 14px;text-decoration:none;">↗</a>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openGrammarLesson(url, title) {
+    document.getElementById('grammar-viewer-title').textContent = title;
+    document.getElementById('grammar-open-tab').href = url;
+    document.getElementById('grammar-iframe').src = url;
+    const viewer = document.getElementById('grammar-viewer');
+    viewer.style.display = 'block';
+    viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeGrammarViewer() {
+    document.getElementById('grammar-viewer').style.display = 'none';
+    document.getElementById('grammar-iframe').src = '';
+}
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+loadChannelVideos();
+renderLessons();
+renderNotepad();
+generateVocab();
+renderGrammarGrid('grammar-prelim',    grammarPrelim);
+renderGrammarGrid('grammar-main',      grammarMain);
+renderGrammarGrid('grammar-readings',  grammarReadings);
+</script>
+</body>
+</html>
