@@ -25,49 +25,118 @@
             min-height: 100vh;
         }
 
-        /* HEADER */
-        header {
+        /* APP SHELL */
+        html, body { height: 100%; overflow: hidden; }
+        .app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
             background: var(--surface);
-            border-bottom: 3px solid var(--green);
-            padding: 0 24px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 200;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-brand {
             display: flex;
             align-items: center;
-            height: 60px;
-            gap: 12px;
+            gap: 10px;
+            padding: 20px 16px 16px;
+            border-bottom: 2px solid var(--green);
+            flex-shrink: 0;
         }
-        .header-flag { font-size: 1.6rem; }
-        header h1 { font-size: 1.25rem; font-weight: 600; }
-        header h1 span { color: #4adf4a; }
-
-        /* NAV */
-        nav {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            padding: 0 24px;
-            gap: 2px;
-            overflow-x: auto;
-        }
+        .sidebar-brand .flag { font-size: 1.5rem; }
+        .sidebar-brand .brand-text { font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
+        .sidebar-brand .brand-text span { color: #4adf4a; display: block; }
+        .sidebar-nav { display: flex; flex-direction: column; padding: 10px 8px; gap: 2px; flex: 1; }
         .tab-btn {
-            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 12px;
             border: none;
             background: transparent;
             color: var(--muted);
             cursor: pointer;
             font-size: 0.88rem;
             font-weight: 500;
-            white-space: nowrap;
-            border-bottom: 3px solid transparent;
+            border-radius: 8px;
             transition: all 0.2s;
-            margin-bottom: -1px;
+            text-align: left;
+            width: 100%;
+            font-family: inherit;
         }
-        .tab-btn:hover { color: var(--text); background: var(--surface2); }
-        .tab-btn.active { color: #4adf4a; border-bottom-color: #4adf4a; }
+        .tab-btn:hover { background: var(--surface2); color: var(--text); }
+        .tab-btn.active { background: var(--surface2); color: #4adf4a; border-left: 3px solid #4adf4a; padding-left: 9px; }
+        .tab-btn .nav-icon { font-size: 1.1rem; flex-shrink: 0; }
 
-        /* MAIN */
-        main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
-        .tab-panel { display: none; }
+        /* SIDEBAR OVERLAY (mobile) */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 199;
+        }
+        .sidebar-overlay.open { display: block; }
+
+        /* MOBILE TOPBAR */
+        .mobile-topbar {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 0 16px;
+            height: 54px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .hamburger-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            line-height: 1;
+        }
+        .hamburger-btn:hover { background: var(--surface2); }
+        .mobile-title { font-size: 0.95rem; font-weight: 600; }
+
+        /* MAIN AREA */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+        }
+        .content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 24px;
+        }
+        .tab-panel { display: none; max-width: 1100px; margin: 0 auto; }
         .tab-panel.active { display: block; }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0; top: 0;
+                transform: translateX(-100%);
+                height: 100vh;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .mobile-topbar { display: flex; }
+            .content-scroll { padding: 20px 14px; }
+        }
 
         /* TYPOGRAPHY */
         .section-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 6px; }
@@ -427,23 +496,36 @@
     </style>
 </head>
 <body>
+<div class="app-shell">
 
-<header>
-    <span class="header-flag">🇧🇷</span>
-    <h1>Portuguese <span>Learning Hub</span></h1>
-</header>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <span class="flag">🇧🇷</span>
+        <div class="brand-text">Portuguese<span>Learning Hub</span></div>
+    </div>
+    <nav class="sidebar-nav">
+        <button class="tab-btn active" data-tab="youtube"><span class="nav-icon">🎬</span> Easy Portuguese</button>
+        <button class="tab-btn" data-tab="tafalado"><span class="nav-icon">🎙️</span> Tá Falado</button>
+        <button class="tab-btn" data-tab="translator"><span class="nav-icon">🔤</span> Translator</button>
+        <button class="tab-btn" data-tab="notepad"><span class="nav-icon">📝</span> Notepad</button>
+        <button class="tab-btn" data-tab="vocab"><span class="nav-icon">🃏</span> Vocab Builder</button>
+        <button class="tab-btn" data-tab="grammar"><span class="nav-icon">📖</span> Grammar Lessons</button>
+        <button class="tab-btn" data-tab="settings"><span class="nav-icon">⚙️</span> Settings</button>
+    </nav>
+</aside>
 
-<nav>
-    <button class="tab-btn active" data-tab="youtube">🎬 Easy Portuguese</button>
-    <button class="tab-btn" data-tab="tafalado">🎙️ Tá Falado</button>
-    <button class="tab-btn" data-tab="translator">🔤 Translator</button>
-    <button class="tab-btn" data-tab="notepad">📝 Notepad</button>
-    <button class="tab-btn" data-tab="vocab">🃏 Vocab Builder</button>
-    <button class="tab-btn" data-tab="grammar">📖 Grammar Lessons</button>
-    <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
-</nav>
+<!-- MOBILE OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-<main>
+<!-- MAIN AREA -->
+<div class="main-area">
+    <div class="mobile-topbar">
+        <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
+        <span class="mobile-title" id="mobile-title">🎬 Easy Portuguese</span>
+    </div>
+    <div class="content-scroll">
+<div id="tab-panels-root">
 
     <!-- ===== EASY PORTUGUESE ===== -->
     <div class="tab-panel active" id="tab-youtube">
@@ -543,7 +625,6 @@
         </div>
     </div>
 
-</main>
 
     <!-- ===== SETTINGS ===== -->
     <div class="tab-panel" id="tab-settings">
@@ -610,7 +691,10 @@
             </div>
             <iframe id="grammar-iframe" src="" style="width:100%;height:680px;border:none;border-radius:0 0 12px 12px;background:white;"></iframe>
         </div>
-    </div>
+    </div><!-- end tab-panels-root -->
+    </div><!-- end content-scroll -->
+</div><!-- end main-area -->
+</div><!-- end app-shell -->
 
 <!-- VIDEO MODAL -->
 <div class="modal-overlay" id="video-modal" onclick="closeModalBackdrop(event)">
@@ -634,14 +718,39 @@ let OPENAI_KEY = localStorage.getItem('pt-openai-key') || '';
 const TF_BASE    = 'https://www.coerll.utexas.edu/brazilpod/tafalado/';
 
 // ─────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ─────────────────────────────────────────
 // TABS
 // ─────────────────────────────────────────
+const tabTitles = {
+    youtube:    '🎬 Easy Portuguese',
+    tafalado:   '🎙️ Tá Falado',
+    translator: '🔤 Translator',
+    notepad:    '📝 Notepad',
+    vocab:      '🃏 Vocab Builder',
+    grammar:    '📖 Grammar Lessons',
+    settings:   '⚙️ Settings',
+};
+
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        document.getElementById('mobile-title').textContent = tabTitles[btn.dataset.tab] || '';
+        document.querySelector('.content-scroll').scrollTop = 0;
+        closeSidebar();
     });
 });
 
