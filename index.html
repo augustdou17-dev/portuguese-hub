@@ -359,6 +359,18 @@
         }
         .toast.show { transform: translateY(0); opacity: 1; }
 
+        /* SETTINGS TAB */
+        .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; max-width: 600px; }
+        .settings-group { margin-bottom: 28px; }
+        .settings-label { font-weight: 600; margin-bottom: 4px; }
+        .settings-hint { font-size: 0.83rem; color: var(--muted); margin-bottom: 10px; }
+        .settings-hint a { color: var(--green); text-decoration: none; }
+        .settings-hint a:hover { text-decoration: underline; }
+        .settings-row { display: flex; gap: 8px; }
+        .settings-status { font-size: 0.82rem; margin-top: 6px; }
+        .status-ok  { color: #4adf4a; }
+        .status-missing { color: #df6060; }
+
         /* GRAMMAR TAB */
         .grammar-sections { display: flex; flex-direction: column; gap: 32px; }
         .grammar-group-title { font-size: 1rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
@@ -414,6 +426,7 @@
     <button class="tab-btn" data-tab="notepad">📝 Notepad</button>
     <button class="tab-btn" data-tab="vocab">🃏 Vocab Builder</button>
     <button class="tab-btn" data-tab="grammar">📖 Grammar Lessons</button>
+    <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
 </nav>
 
 <main>
@@ -512,6 +525,37 @@
 
 </main>
 
+    <!-- ===== SETTINGS ===== -->
+    <div class="tab-panel" id="tab-settings">
+        <div class="section-title">⚙️ Settings</div>
+        <p class="section-subtitle">Your API keys are saved only in your browser — never in the code or on GitHub</p>
+
+        <div class="settings-card">
+            <div class="settings-group">
+                <div class="settings-label">YouTube API Key</div>
+                <div class="settings-hint">Used to load Easy Portuguese videos. Get it from <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a>.</div>
+                <div class="settings-row">
+                    <input type="password" id="input-yt-key" placeholder="Paste your YouTube API key here" />
+                    <button class="btn btn-secondary" onclick="toggleVisibility('input-yt-key', this)">Show</button>
+                </div>
+                <div class="settings-status" id="status-yt"></div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-label">OpenAI API Key</div>
+                <div class="settings-hint">Used for the Translator and Vocab Builder. Get it from <a href="https://platform.openai.com" target="_blank">platform.openai.com</a>.</div>
+                <div class="settings-row">
+                    <input type="password" id="input-openai-key" placeholder="Paste your OpenAI API key here" />
+                    <button class="btn btn-secondary" onclick="toggleVisibility('input-openai-key', this)">Show</button>
+                </div>
+                <div class="settings-status" id="status-openai"></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveKeys()">Save Keys</button>
+            <button class="btn btn-danger" style="margin-left:10px" onclick="clearKeys()">Clear All Keys</button>
+        </div>
+    </div>
+
     <!-- ===== GRAMMAR LESSONS ===== -->
     <div class="tab-panel" id="tab-grammar">
         <div class="section-title">📖 Grammar Lessons</div>
@@ -565,8 +609,8 @@
 // ─────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────
-const YT_KEY     = 'AIzaSyBLZ_3h3tT0IEd7zeJcoe3j5eFkZpEtaQE';
-const OPENAI_KEY = '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';
+let YT_KEY     = localStorage.getItem('pt-yt-key')     || '';
+let OPENAI_KEY = localStorage.getItem('pt-openai-key') || '';
 const TF_BASE    = 'https://www.coerll.utexas.edu/brazilpod/tafalado/';
 
 // ─────────────────────────────────────────
@@ -612,6 +656,7 @@ async function findChannelId() {
 }
 
 async function loadChannelVideos() {
+    if (!requireKeys(['yt'])) return;
     document.getElementById('yt-search').value = '';
     ytCurrentQuery = '';
     ytNextPageToken = '';
@@ -814,6 +859,7 @@ function swapLanguage() {
 }
 
 async function translate() {
+    if (!requireKeys(['openai'])) return;
     const text = document.getElementById('translate-input').value.trim();
     if (!text) return;
     const output = document.getElementById('translate-output');
@@ -947,6 +993,7 @@ const topicMap = {
 const levelMap = { beginner: 'A1-A2', intermediate: 'B1-B2', advanced: 'C1-C2' };
 
 async function generateVocab() {
+    if (!requireKeys(['openai'])) return;
     const level = document.getElementById('vocab-level').value;
     const topic = document.getElementById('vocab-topic').value;
     document.getElementById('vocab-container').innerHTML = '<div class="loading"><div class="spinner"></div>Generating vocabulary set...</div>';
@@ -1039,6 +1086,61 @@ function nextCard(knew) {
 }
 
 // ─────────────────────────────────────────
+// SETTINGS MODULE
+// ─────────────────────────────────────────
+function loadSettingsUI() {
+    const ytKey     = localStorage.getItem('pt-yt-key')     || '';
+    const openaiKey = localStorage.getItem('pt-openai-key') || '';
+    document.getElementById('input-yt-key').value     = ytKey;
+    document.getElementById('input-openai-key').value = openaiKey;
+    updateStatus('status-yt',     ytKey,     'YouTube key saved', 'YouTube key not set');
+    updateStatus('status-openai', openaiKey, 'OpenAI key saved',  'OpenAI key not set');
+}
+
+function updateStatus(elId, value, okMsg, missingMsg) {
+    const el = document.getElementById(elId);
+    if (value) { el.textContent = '✓ ' + okMsg;     el.className = 'settings-status status-ok'; }
+    else        { el.textContent = '✗ ' + missingMsg; el.className = 'settings-status status-missing'; }
+}
+
+function saveKeys() {
+    const ytKey     = document.getElementById('input-yt-key').value.trim();
+    const openaiKey = document.getElementById('input-openai-key').value.trim();
+    if (ytKey)     { localStorage.setItem('pt-yt-key',     ytKey);     YT_KEY     = ytKey; }
+    if (openaiKey) { localStorage.setItem('pt-openai-key', openaiKey); OPENAI_KEY = openaiKey; }
+    loadSettingsUI();
+    showToast('Keys saved!');
+}
+
+function clearKeys() {
+    localStorage.removeItem('pt-yt-key');
+    localStorage.removeItem('pt-openai-key');
+    YT_KEY = ''; OPENAI_KEY = '';
+    document.getElementById('input-yt-key').value     = '';
+    document.getElementById('input-openai-key').value = '';
+    loadSettingsUI();
+    showToast('Keys cleared.');
+}
+
+function toggleVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    btn.textContent = isHidden ? 'Hide' : 'Show';
+}
+
+function requireKeys(needs = ['yt', 'openai']) {
+    const missing = [];
+    if (needs.includes('yt')     && !YT_KEY)     missing.push('YouTube');
+    if (needs.includes('openai') && !OPENAI_KEY) missing.push('OpenAI');
+    if (missing.length) {
+        showToast(`Missing API keys: ${missing.join(', ')} — go to ⚙️ Settings`);
+        return false;
+    }
+    return true;
+}
+
+// ─────────────────────────────────────────
 // GRAMMAR MODULE
 // ─────────────────────────────────────────
 const GRAMMAR_BASE = 'https://wisc.pb.unizin.org/portuguese/';
@@ -1110,13 +1212,16 @@ function closeGrammarViewer() {
 // ─────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────
-loadChannelVideos();
+loadSettingsUI();
 renderLessons();
 renderNotepad();
-generateVocab();
 renderGrammarGrid('grammar-prelim',    grammarPrelim);
 renderGrammarGrid('grammar-main',      grammarMain);
 renderGrammarGrid('grammar-readings',  grammarReadings);
+if (YT_KEY)     loadChannelVideos();
+else document.getElementById('video-grid').innerHTML = '<div class="empty-state"><div class="icon">🔑</div><div class="title">YouTube key not set</div>Go to ⚙️ Settings to add your API keys.</div>';
+if (OPENAI_KEY) generateVocab();
+else document.getElementById('vocab-container').innerHTML = '<div class="empty-state"><div class="icon">🔑</div><div class="title">OpenAI key not set</div>Go to ⚙️ Settings to add your API keys.</div>';
 </script>
 </body>
 </html>
