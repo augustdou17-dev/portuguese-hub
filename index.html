@@ -1406,6 +1406,7 @@ function renderFlashcard() {
                 <div class="flashcard-back">
                     <div class="flashcard-translation">${card.translation}</div>
                     <div class="flashcard-example">${card.example}</div>
+                    <button class="speak-btn" style="margin-top:14px" onclick="event.stopPropagation();speak('${card.example.split('(')[0].trim().replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','pt-BR')" title="Hear example sentence">🔊 Example</button>
                 </div>
             </div>
         </div>
